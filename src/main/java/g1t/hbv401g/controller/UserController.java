@@ -15,12 +15,18 @@ public class UserController {
     }
 
     public User register(String email, String password) {
+        return register(email, password, null);
+    }
+
+    public User register(String email, String password, String username) {
         validate(email, password);
         String key = email.toLowerCase();
         if (users.containsKey(key)) {
             throw new IllegalStateException("Email already registered");
         }
-        User user = new User(email, password);
+        User user = username == null || username.isBlank()
+                ? new User(email, password)
+                : new User(email, password, username);
         users.put(key, user);
         return user;
     }

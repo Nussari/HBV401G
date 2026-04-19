@@ -1,6 +1,7 @@
 package g1t.hbv401g.controller;
 
 import g1t.hbv401g.model.Airport;
+import g1t.hbv401g.model.DayTrip;
 import g1t.hbv401g.model.Flight;
 
 import java.time.LocalDate;
@@ -10,16 +11,20 @@ import java.util.List;
 public class SearchController {
 
     private final MockFlightSearchController flightSearchController;
-    // private EventController eventController; - setja inn þegar lið D skilar
+    private final MockDayTripController dayTripController;
     // private HotelSearchController hotelSearchController; - setja inn þegar lið H skilar
 
-    public SearchController(MockFlightSearchController flightSearchController) {
+    public SearchController(MockFlightSearchController flightSearchController,
+                            MockDayTripController dayTripController) {
         this.flightSearchController = flightSearchController;
+        this.dayTripController = dayTripController;
     }
 
     public SearchController() {
-        this(new MockFlightSearchController());
+        this(new MockFlightSearchController(), new MockDayTripController());
     }
+
+    public MockDayTripController getDayTripController() { return dayTripController; }
 
     // ná í alla staði fyrir view dropdowns
     public List<String> getPlaces() {
@@ -140,9 +145,12 @@ public class SearchController {
         return matched;
     }
 
-    // Event search
-    public List<String> searchEvents(String name) {
-        return new ArrayList<>();
+    public List<DayTrip> searchDayTrips(String category, int spacesNeeded) {
+        return dayTripController.search(category, Math.max(1, spacesNeeded));
+    }
+
+    public List<DayTrip> searchAllDayTrips() {
+        return dayTripController.searchAll();
     }
 
     // Hotel search
