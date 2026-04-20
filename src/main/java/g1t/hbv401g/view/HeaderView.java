@@ -79,7 +79,7 @@ public class HeaderView {
         if (state.isLoggedIn()) {
             HBox chip = new HBox(10);
             chip.getStyleClass().add("tx-user-chip");
-            chip.setAlignment(Pos.CENTER_LEFT);
+            chip.setAlignment(Pos.CENTER);
 
             String username = state.getCurrentUser().getUsername();
             if (username == null) username = "";

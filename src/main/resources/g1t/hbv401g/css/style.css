@@ -113,7 +113,7 @@
     -fx-background-radius: 999;
     -fx-text-fill: tx-fg;
     -fx-font-size: 13px;
-    -fx-padding: 6 14 6 6;
+    -fx-padding: 6 14 6 14;
     -fx-cursor: hand;
 }
 .tx-user-chip:hover { -fx-background-color: tx-bg-4; }
