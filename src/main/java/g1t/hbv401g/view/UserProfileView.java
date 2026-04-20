@@ -110,16 +110,44 @@ public class UserProfileView {
                         v -> { if (!v.isEmpty()) { user.setUsername(v); s.notifyListeners(); } }),
                 InfoRow.text("EMAIL", user.getEmail(), "EDIT",
                         v -> { if (!v.isEmpty()) { user.setEmail(v); s.notifyListeners(); } }),
-                InfoRow.password("PASSWORD", "CHANGE",
-                        v -> {
-                            if (!v.isEmpty() && s.getCurrentUser() != null) {
-                                s.getCurrentUser().setPassword(v);
-                            }
-                            s.notifyListeners();
-                        }),
                 buildDivider(),
-                buildLogoutButton());
+                buildLogoutButton(),
+                buildChangePasswordButton());
         return panel;
+    }
+
+    private Button buildChangePasswordButton() {
+        Button change = new Button("Change password");
+        change.getStyleClass().addAll("btn", "btn-danger");
+        change.setMaxWidth(Double.MAX_VALUE);
+        change.setOnAction(e -> promptChangePassword());
+        return change;
+    }
+
+    private void promptChangePassword() {
+        AppState s = AppState.get();
+        if (s.getCurrentUser() == null) return;
+
+        PasswordField pw = new PasswordField();
+        pw.setPromptText("New password");
+
+        javafx.scene.control.Dialog<String> dialog = new javafx.scene.control.Dialog<>();
+        dialog.setTitle("Change password");
+        dialog.setHeaderText(null);
+        dialog.getDialogPane().setContent(pw);
+        dialog.getDialogPane().getButtonTypes().addAll(
+                javafx.scene.control.ButtonType.OK,
+                javafx.scene.control.ButtonType.CANCEL);
+        dialog.setResultConverter(bt ->
+                bt == javafx.scene.control.ButtonType.OK ? pw.getText() : null);
+        javafx.application.Platform.runLater(pw::requestFocus);
+
+        dialog.showAndWait().ifPresent(v -> {
+            if (v != null && !v.isEmpty()) {
+                s.getCurrentUser().setPassword(v);
+                s.notifyListeners();
+            }
+        });
     }
 
     private HBox buildAccountHead() {

@@ -254,6 +254,7 @@ public class CheckoutView {
         StackPane wrap = new StackPane(box);
         wrap.setPadding(new Insets(140, 40, 140, 40));
         return wrap;
+    }
 
     private StackPane buildEmpty() {
         Label h = new Label("Your cart is empty.");
