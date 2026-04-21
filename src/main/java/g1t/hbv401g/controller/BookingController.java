@@ -1,30 +1,40 @@
 package g1t.hbv401g.controller;
 
+import g1t.hbv401g.db.Database;
 import g1t.hbv401g.model.Booking;
-import g1t.hbv401g.model.DayTrip;
-import g1t.hbv401g.model.DayTripBookingResult;
-import g1t.hbv401g.model.Flight;
-import g1t.hbv401g.model.FlightBooking;
 import g1t.hbv401g.model.Trip;
 import g1t.hbv401g.model.User;
+import g1t.teamD.controller.DayTripBookingController;
+import g1t.teamD.db.DayTripBookingDB;
+import g1t.teamD.db.DayTripDB;
+import g1t.teamD.model.DayTrip;
+import g1t.teamD.model.DayTripBooking;
+import g1t.teamD.model.DayTripBookingResult;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 
 public class BookingController {
 
-    private final MockFlightBookingController flightBookingController;
-    private final MockDayTripBookingController dayTripBookingController;
+    // private FlightBookingController flightBookingController; - setja inn þegar lið F skilar
+    private final DayTripBookingController dayTripBookingController;
 
-    public BookingController(MockFlightBookingController flightBookingController,
-                             MockDayTripBookingController dayTripBookingController) {
-        this.flightBookingController = flightBookingController;
+    public BookingController(DayTripBookingController dayTripBookingController) {
         this.dayTripBookingController = dayTripBookingController;
     }
 
     public BookingController() {
-        this(new MockFlightBookingController(), new MockDayTripBookingController());
+        DayTripBookingController ctrl = null;
+        try {
+            DayTripDB tripDB = new DayTripDB(Database.teamD());
+            DayTripBookingDB bookingDB = new DayTripBookingDB(Database.teamD());
+            ctrl = new DayTripBookingController(bookingDB, tripDB);
+        } catch (SQLException e) {
+            System.err.println("[booking] team D init failed: " + e.getMessage());
+        }
+        this.dayTripBookingController = ctrl;
     }
 
     public List<Booking> checkout(User user) {
@@ -36,22 +46,27 @@ public class BookingController {
         for (Trip trip : trips) {
             Booking booking = new Booking(trip);
 
-            for (Flight flight : trip.getFlights()) {
-                FlightBooking fb = flightBookingController.createBooking(flight, null, 1);
-                if (fb != null) {
-                    flightBookingController.confirmBooking(fb);
-                    booking.addFlightBooking(fb);
-                }
-            }
+            // Flight booking: bíður eftir F innleiðingu
+            // for (Flight flight : trip.getFlights()) {
+            //     FlightBooking fb = flightBookingController.createBooking(flight, null, 1);
+            //     if (fb != null) {
+            //         flightBookingController.confirmBooking(fb);
+            //         booking.addFlightBooking(fb);
+            //     }
+            // }
 
-            for (DayTrip dayTrip : trip.getDayTrips()) {
-                DayTripBookingResult result = dayTripBookingController.book(
-                        user.getUsername(),
-                        dayTrip.getTripID(),
-                        "+000",
-                        user.getEmail());
-                if (result.success) {
-                    booking.addDayTripBooking(dayTripBookingController.findBooking(result.bookingID));
+            if (dayTripBookingController != null) {
+                for (DayTrip dayTrip : trip.getDayTrips()) {
+                    DayTripBookingResult result = dayTripBookingController.book(
+                            user.getUsername(),
+                            dayTrip.getTripID(),
+                            "+0000000",
+                            user.getEmail());
+                    if (result.success) {
+                        booking.addDayTripBooking(new DayTripBooking(
+                                result.bookingID, dayTrip.getTripID(),
+                                user.getUsername(), "+0000000", user.getEmail()));
+                    }
                 }
             }
 

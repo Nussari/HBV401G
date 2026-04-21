@@ -3,6 +3,7 @@ package g1t.hbv401g.controller;
 import g1t.hbv401g.model.Cart;
 import g1t.hbv401g.model.Trip;
 import g1t.hbv401g.model.User;
+import g1t.teamD.model.DayTrip;
 
 import java.util.Collections;
 import java.util.List;
@@ -12,6 +13,18 @@ public class CartController {
     public boolean addTrip(User user, Trip trip) {
         if (user == null || trip == null || !trip.hasComponent()) return false;
         return user.getCart().addTrip(trip);
+    }
+
+    public boolean addSelection(User user, List<DayTrip> dayTrips) {
+        if (user == null || dayTrips == null || dayTrips.isEmpty()) return false;
+        Trip trip = new Trip(buildDefaultName(dayTrips));
+        for (DayTrip d : dayTrips) trip.addDayTrip(d);
+        return addTrip(user, trip);
+    }
+
+    private String buildDefaultName(List<DayTrip> dayTrips) {
+        String dest = dayTrips.get(0).getPlace();
+        return (dest == null || dest.isBlank()) ? "Trip" : "Trip to " + dest;
     }
 
     public boolean removeTrip(User user, Trip trip) {
