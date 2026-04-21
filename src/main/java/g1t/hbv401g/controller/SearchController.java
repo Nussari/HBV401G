@@ -114,6 +114,7 @@ public class SearchController {
     }
 
     // helper fall sem mappar place og airport svo hægt sé að leita eftir borgum
+    /*
     public List<Airport> findAirportsByPlace(String place) {
         List<Airport> matched = new ArrayList<>();
         for (Airport a : flightSearchController.findAllAirports()) {
@@ -123,6 +124,7 @@ public class SearchController {
         }
         return matched;
     }
+    */
 
     public List<DayTrip> searchDayTrips(String place, int spacesNeeded,
                                         LocalDate startDate, LocalDate endDate,
