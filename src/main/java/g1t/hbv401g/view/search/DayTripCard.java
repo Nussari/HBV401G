@@ -1,7 +1,6 @@
 package g1t.hbv401g.view.search;
 
-import g1t.hbv401g.model.DayTrip;
-import javafx.geometry.Insets;
+import g1t.teamD.model.DayTrip;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -24,11 +23,14 @@ public final class DayTripCard {
         card.setMinWidth(240);
         card.setMaxWidth(320);
 
+        Region spacer = new Region();
+        VBox.setVgrow(spacer, Priority.ALWAYS);
+
         card.getChildren().setAll(
                 topRow(t),
                 title(t),
+                spacer,
                 meta(t),
-                divider(),
                 priceRow(t));
 
         if (initiallySelected) card.getStyleClass().add("selected");
@@ -66,13 +68,6 @@ public final class DayTripCard {
         Label meta = new Label(t.getCategory() + "  \u00B7  " + t.getDuration() + "h  \u00B7  " + t.getDate());
         meta.getStyleClass().addAll("mono", "fs-11");
         return meta;
-    }
-
-    private static Region divider() {
-        Region sep = new Region();
-        sep.getStyleClass().add("divider-h");
-        VBox.setMargin(sep, new Insets(4, 0, 4, 0));
-        return sep;
     }
 
     private static HBox priceRow(DayTrip t) {

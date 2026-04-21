@@ -1,7 +1,7 @@
 package g1t.hbv401g.view.search;
 
 import g1t.hbv401g.controller.SearchController;
-import g1t.hbv401g.model.DayTrip;
+import g1t.teamD.model.DayTrip;
 import g1t.hbv401g.model.Flight;
 import g1t.hbv401g.view.util.Animations;
 import javafx.geometry.Pos;
@@ -127,10 +127,10 @@ public final class SearchResults {
 
     private VBox eventsSection(SearchFilters filters, SearchForm form) {
         VBox section = new VBox(16);
-        List<DayTrip> trips = controller.searchDayTrips(null, form.travellers());
-        double pMin = filters.priceMin();
-        double pMax = filters.priceMax();
-        trips.removeIf(t -> t.getPrice() < pMin || t.getPrice() > pMax);
+        List<DayTrip> trips = controller.searchDayTrips(
+                form.to(), form.travellers(),
+                form.depart(), form.returnOn(),
+                filters.priceMin(), filters.priceMax());
         selectedDayTrips.retainAll(trips);
 
         section.getChildren().add(sectionHead("Day-trips", trips.size() + " OPTIONS  \u00B7  PICK ANY"));

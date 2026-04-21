@@ -7,6 +7,7 @@ import g1t.hbv401g.model.Booking;
 import g1t.hbv401g.model.Cart;
 import g1t.hbv401g.model.Trip;
 import g1t.hbv401g.model.User;
+import g1t.teamD.model.DayTrip;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -56,6 +57,13 @@ public final class AppState {
     public boolean addTripToCart(Trip trip) {
         if (!isLoggedIn()) return false;
         boolean ok = cartController.addTrip(currentUser, trip);
+        if (ok) notifyListeners();
+        return ok;
+    }
+
+    public boolean addSelectionToCart(List<DayTrip> dayTrips) {
+        if (!isLoggedIn()) return false;
+        boolean ok = cartController.addSelection(currentUser, dayTrips);
         if (ok) notifyListeners();
         return ok;
     }

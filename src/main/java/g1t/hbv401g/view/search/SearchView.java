@@ -1,9 +1,8 @@
 package g1t.hbv401g.view.search;
 
 import g1t.hbv401g.controller.SearchController;
-import g1t.hbv401g.model.DayTrip;
+import g1t.teamD.model.DayTrip;
 import g1t.hbv401g.model.Flight;
-import g1t.hbv401g.model.Trip;
 import g1t.hbv401g.view.ViewRouter;
 import g1t.hbv401g.view.state.AppState;
 import javafx.geometry.Insets;
@@ -100,29 +99,9 @@ public final class SearchView {
             return;
         }
 
-        Trip trip = new Trip(tripNameForDestination());
-
-        Flight out = results.selectedOut();
-        Flight ret = results.selectedReturn();
-        if (out != null) trip.addFlight(out);
-        if (ret != null) trip.addFlight(ret);
-        for (DayTrip dt : results.selectedDayTrips()) trip.addDayTrip(dt);
-
-        AppState.get().addTripToCart(trip);
+        AppState.get().addSelectionToCart(results.selectedDayTrips());
 
         results.clearSelection();
         ViewRouter.get().openCart();
-    }
-
-    private String tripNameForDestination() {
-        String dest = null;
-        if (results.selectedOut() != null) {
-            dest = results.selectedOut().getArrivalA().getPlace();
-        } else if (!results.selectedDayTrips().isEmpty()) {
-            dest = results.selectedDayTrips().get(0).getName();
-        } else if (results.selectedReturn() != null) {
-            dest = results.selectedReturn().getArrivalA().getPlace();
-        }
-        return (dest == null || dest.isBlank()) ? "Trip" : "Trip to " + dest;
     }
 }

@@ -455,6 +455,8 @@
     -fx-border-width: 1;
     -fx-padding: 20;
     -fx-cursor: hand;
+    -fx-pref-height: 220;
+    -fx-min-height: 220;
 }
 .event-card:hover { -fx-border-color: tx-line; -fx-background-color: tx-bg-3; }
 .event-card.selected {

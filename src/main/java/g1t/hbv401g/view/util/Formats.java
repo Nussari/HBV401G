@@ -1,6 +1,6 @@
 package g1t.hbv401g.view.util;
 
-import g1t.hbv401g.model.DayTrip;
+import g1t.teamD.model.DayTrip;
 import g1t.hbv401g.model.Flight;
 
 // formatting helperar
