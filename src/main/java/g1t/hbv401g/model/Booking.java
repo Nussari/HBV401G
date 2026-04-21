@@ -11,6 +11,7 @@ public class Booking {
     private final Trip trip;
     private final List<FlightBooking> flightBookings = new ArrayList<>();
     private final List<DayTripBooking> dayTripBookings = new ArrayList<>();
+    private is.hi.H1.model.Booking hotelBooking;
 
     public Booking(Trip trip) {
         this.trip = trip;
@@ -25,4 +26,8 @@ public class Booking {
 
     public List<DayTripBooking> getDayTripBookings() { return Collections.unmodifiableList(dayTripBookings); }
     public void addDayTripBooking(DayTripBooking booking) { if (booking != null) dayTripBookings.add(booking); }
+
+    public is.hi.H1.model.Booking getHotelBooking() { return hotelBooking; }
+    public void setHotelBooking(is.hi.H1.model.Booking booking) { this.hotelBooking = booking; }
+    public boolean hasHotelBooking() { return hotelBooking != null; }
 }

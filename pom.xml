@@ -33,6 +33,14 @@
         </dependency>
 
         <dependency>
+            <groupId>is.hi</groupId>
+            <artifactId>H1</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/libs/H1-1.0.jar</systemPath>
+        </dependency>
+
+        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
             <version>${junit.version}</version>
