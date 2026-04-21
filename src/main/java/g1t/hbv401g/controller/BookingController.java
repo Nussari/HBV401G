@@ -14,12 +14,16 @@ import g1t.teamD.model.DayTripBookingResult;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import controller.*;
+import model.*;
+import storage.*;
 
 
 public class BookingController {
 
     // private FlightBookingController flightBookingController; - setja inn þegar lið F skilar
     private final DayTripBookingController dayTripBookingController;
+    private final
 
     public BookingController(DayTripBookingController dayTripBookingController) {
         this.dayTripBookingController = dayTripBookingController;
