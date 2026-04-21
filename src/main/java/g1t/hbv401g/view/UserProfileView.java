@@ -107,9 +107,9 @@ public class UserProfileView {
         panel.getChildren().setAll(
                 buildAccountHead(),
                 InfoRow.text("USERNAME", user.getUsername(), "EDIT",
-                        v -> { if (!v.isEmpty()) { user.setUsername(v); s.notifyListeners(); } }),
+                        v -> { if (!v.isEmpty()) s.updateUsername(v); }),
                 InfoRow.text("EMAIL", user.getEmail(), "EDIT",
-                        v -> { if (!v.isEmpty()) { user.setEmail(v); s.notifyListeners(); } }),
+                        v -> { if (!v.isEmpty()) s.updateEmail(v); }),
                 buildDivider(),
                 buildLogoutButton(),
                 buildChangePasswordButton());
@@ -143,10 +143,7 @@ public class UserProfileView {
         javafx.application.Platform.runLater(pw::requestFocus);
 
         dialog.showAndWait().ifPresent(v -> {
-            if (v != null && !v.isEmpty()) {
-                s.getCurrentUser().setPassword(v);
-                s.notifyListeners();
-            }
+            if (v != null && !v.isEmpty()) s.changePassword(v);
         });
     }
 

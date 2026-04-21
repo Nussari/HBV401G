@@ -49,4 +49,13 @@ public class CartController {
     public void clear(User user) {
         if (user != null) user.getCart().clear();
     }
+
+    public void renameTrip(Trip trip, String name) {
+        if (trip == null) return;
+        if (name == null || name.isBlank() || name.equals(trip.getDefaultName())) {
+            trip.setCustomName(null);
+        } else {
+            trip.setCustomName(name);
+        }
+    }
 }

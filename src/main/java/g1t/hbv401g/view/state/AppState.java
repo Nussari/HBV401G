@@ -3,6 +3,8 @@ package g1t.hbv401g.view.state;
 import g1t.hbv401g.controller.BookingController;
 import g1t.hbv401g.controller.CartController;
 import g1t.hbv401g.controller.UserController;
+import g1t.hbv401g.db.Database;
+import g1t.hbv401g.demo.DemoDataLoader;
 import g1t.hbv401g.model.Booking;
 import g1t.hbv401g.model.Cart;
 import g1t.hbv401g.model.Trip;
@@ -16,8 +18,8 @@ import java.util.List;
 // appstate notað í stað gagnagrunns þar sem gagnagrunnur er ekki partur af þessu verkefni
 public final class AppState {
 
-    private static final AppState INSTANCE = new AppState();
-    public static AppState get() { return INSTANCE; }
+    private static final class Holder { static final AppState INSTANCE = new AppState(); }
+    public static AppState get() { return Holder.INSTANCE; }
 
     private final UserController userController = new UserController();
     private final CartController cartController = new CartController();
@@ -30,7 +32,35 @@ public final class AppState {
     private AppState() {
     }
 
+    public static void init() {
+        Database.init();
+        DemoDataLoader.load();
+    }
+
     public UserController getUserController() { return userController; }
+
+    public void updateEmail(String email) {
+        if (!isLoggedIn()) return;
+        userController.updateEmail(currentUser, email);
+        notifyListeners();
+    }
+
+    public void updateUsername(String username) {
+        if (!isLoggedIn()) return;
+        userController.updateUsername(currentUser, username);
+        notifyListeners();
+    }
+
+    public void changePassword(String password) {
+        if (!isLoggedIn()) return;
+        userController.changePassword(currentUser, password);
+        notifyListeners();
+    }
+
+    public void renameTrip(Trip trip, String name) {
+        cartController.renameTrip(trip, name);
+        notifyListeners();
+    }
 
     public boolean isLoggedIn() { return currentUser != null; }
     public User getCurrentUser() { return currentUser; }

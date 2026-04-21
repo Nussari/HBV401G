@@ -1,7 +1,6 @@
 package g1t.hbv401g.view;
 
-import g1t.hbv401g.db.Database;
-import g1t.hbv401g.demo.DemoDataLoader;
+import g1t.hbv401g.view.state.AppState;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -13,8 +12,7 @@ public class MainView extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        Database.init();
-        DemoDataLoader.load();
+        AppState.init();
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/g1t/hbv401g/fxml/main-view.fxml"));
         StackPane rootStack = loader.load();

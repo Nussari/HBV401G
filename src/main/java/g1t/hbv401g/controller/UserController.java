@@ -40,6 +40,33 @@ public class UserController {
         return user;
     }
 
+    public void updateEmail(User user, String email) {
+        if (user == null) return;
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("Email can't be empty");
+        }
+        if (!email.contains("@")) {
+            throw new IllegalArgumentException("Email must contain '@'");
+        }
+        user.setEmail(email);
+    }
+
+    public void updateUsername(User user, String username) {
+        if (user == null) return;
+        if (username == null || username.isBlank()) {
+            throw new IllegalArgumentException("Username can't be empty");
+        }
+        user.setUsername(username);
+    }
+
+    public void changePassword(User user, String password) {
+        if (user == null) return;
+        if (password == null || password.isBlank()) {
+            throw new IllegalArgumentException("Password can't be empty");
+        }
+        user.setPassword(password);
+    }
+
     private void validate(String email, String password) {
         if (email == null || email.isBlank()) {
             throw new IllegalArgumentException("Email can't be empty");

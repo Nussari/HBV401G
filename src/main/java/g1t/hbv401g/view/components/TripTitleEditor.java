@@ -54,12 +54,7 @@ public final class TripTitleEditor {
 
         Runnable commit = () -> {
             String v = input.getText() == null ? "" : input.getText().trim();
-            if (v.isEmpty() || v.equals(trip.getDefaultName())) {
-                trip.setCustomName(null);
-            } else {
-                trip.setCustomName(v);
-            }
-            AppState.get().notifyListeners();
+            AppState.get().renameTrip(trip, v);
         };
         input.setOnAction(e -> commit.run());
         input.focusedProperty().addListener((o, was, isNow) -> { if (!isNow) commit.run(); });
