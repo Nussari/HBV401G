@@ -5,6 +5,7 @@ module g1t.hbv401g {
 
     opens g1t.hbv401g.controller to javafx.fxml;
     opens g1t.hbv401g.view to javafx.fxml;
+    
 
     exports g1t.hbv401g.model;
     exports g1t.hbv401g.controller;
@@ -12,4 +13,8 @@ module g1t.hbv401g {
 
     exports g1t.teamD.model;
     exports g1t.teamD.controller;
+
+    exports g1t.teamF.controller;
+    exports g1t.teamF.model;
+    exports g1t.teamF.db;
 }

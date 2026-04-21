@@ -1,11 +1,14 @@
 package g1t.hbv401g.controller;
 
 import g1t.hbv401g.db.Database;
-import g1t.hbv401g.model.Airport;
-import g1t.hbv401g.model.Flight;
 import g1t.teamD.controller.DayTripController;
 import g1t.teamD.db.DayTripDB;
 import g1t.teamD.model.DayTrip;
+
+import g1t.teamF.controller.FlightSearchController;
+import g1t.teamF.model.Airport;
+import g1t.teamF.model.Flight;
+import g1t.teamF.db.FlightDAO;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -17,19 +20,24 @@ public class SearchController {
     // private FlightSearchController flightSearchController; - setja inn þegar lið F skilar
     // private HotelSearchController hotelSearchController; - setja inn þegar lið H skilar
     private final DayTripController dayTripController;
+    private final FlightSearchController flightSearchController;
 
-    public SearchController(DayTripController dayTripController) {
+    public SearchController(DayTripController dayTripController, FlightSearchController flightSearchController) {
         this.dayTripController = dayTripController;
+        this.flightSearchController = flightSearchController;
     }
 
     public SearchController() {
         DayTripController ctrl = null;
+        FlightSearchController fctrl = null;
         try {
             ctrl = new DayTripController(new DayTripDB(Database.teamD()));
+            fctrl = new FlightSearchController(new FlightDAO());
         } catch (SQLException e) {
             System.err.println("[search] team D DayTripDB init failed: " + e.getMessage());
         }
         this.dayTripController = ctrl;
+        this.flightSearchController = fctrl;
     }
 
     public record SearchResult(List<Flight> flights, List<DayTrip> dayTrips) {}
@@ -110,6 +118,8 @@ public class SearchController {
 
         return results;
         */
+       
+       flightSearchController.searchFlights(originPlace, destinationPlace, endDate, travellerAmount);
         return new ArrayList<>();
     }
 
