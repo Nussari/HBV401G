@@ -122,7 +122,8 @@ public class SearchController {
 
     // Hotel search - pakkar fyrstu booking-tillögu hvers hótels í HotelSelection
     public List<HotelSelection> searchHotelSelections(LocalDate checkIn, LocalDate checkOut,
-                                                      String place, int capacity) {
+                                                      String place, int capacity,
+                                                      double priceMin, double priceMax) {
         List<HotelSelection> result = new ArrayList<>();
         if (checkIn == null || checkOut == null || place == null || place.isBlank()) return result;
         if (!checkOut.isAfter(checkIn)) return result;
@@ -143,7 +144,10 @@ public class SearchController {
             try {
                 Room[] bestRooms = BookingController.getBestBookingOption(h, capacity);
                 if (bestRooms == null || bestRooms.length == 0) continue;
-                result.add(new HotelSelection(h, bestRooms, checkIn, checkOut, place));
+                HotelSelection sel = new HotelSelection(h, bestRooms, checkIn, checkOut, place);
+                double cost = sel.getTotalCost();
+                if (cost < priceMin || cost > priceMax) continue;
+                result.add(sel);
             } catch (Exception e) {
                 System.err.println("[search] getBestBookingOption failed: " + e.getMessage());
             }

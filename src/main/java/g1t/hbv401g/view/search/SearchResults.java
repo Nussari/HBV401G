@@ -84,7 +84,7 @@ public final class SearchResults {
         }
 
         if (filters.includeFlights()) root.getChildren().add(flightSection("Flight out", outbound, true));
-        if (filters.includeHotels())  root.getChildren().add(hotelSection(form));
+        if (filters.includeHotels())  root.getChildren().add(hotelSection(form, filters));
         if (filters.includeEvents())  root.getChildren().add(eventsSection(filters, form));
         if (filters.includeFlights()) root.getChildren().add(flightSection("Flight home", inbound, false));
 
@@ -127,9 +127,9 @@ public final class SearchResults {
         return section;
     }
 
-    private VBox hotelSection(SearchForm form) {
+    private VBox hotelSection(SearchForm form, SearchFilters filters) {
         VBox section = new VBox(16);
-        List<HotelSelection> options = fetchHotelSelections(form);
+        List<HotelSelection> options = fetchHotelSelections(form, filters);
 
         // keep prior selection only if it's still a match (same hotel name & dates)
         if (selectedHotel != null) {
@@ -172,9 +172,10 @@ public final class SearchResults {
         return section;
     }
 
-    private List<HotelSelection> fetchHotelSelections(SearchForm form) {
+    private List<HotelSelection> fetchHotelSelections(SearchForm form, SearchFilters filters) {
         return controller.searchHotelSelections(
-                form.depart(), form.returnOn(), form.to(), form.travellers());
+                form.depart(), form.returnOn(), form.to(), form.travellers(),
+                filters.priceMin(), filters.priceMax());
     }
 
     private VBox eventsSection(SearchFilters filters, SearchForm form) {
