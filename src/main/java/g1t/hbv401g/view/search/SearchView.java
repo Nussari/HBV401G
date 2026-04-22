@@ -2,7 +2,6 @@ package g1t.hbv401g.view.search;
 
 import g1t.hbv401g.controller.SearchController;
 import g1t.teamD.model.DayTrip;
-import g1t.hbv401g.model.Flight;
 import g1t.hbv401g.view.ViewRouter;
 import g1t.hbv401g.view.state.AppState;
 import javafx.geometry.Insets;

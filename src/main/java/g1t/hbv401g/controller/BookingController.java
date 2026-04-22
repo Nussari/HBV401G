@@ -74,14 +74,13 @@ public class BookingController {
             HotelSelection hotel = trip.getHotel();
             if (hotel != null) {
                 is.hi.H1.model.Booking hBooking = new is.hi.H1.model.Booking(
-                        0,
                         hotel.getCheckIn(),
                         hotel.getCheckOut(),
                         hotel.getRooms(),
                         user.getEmail(),
                         false);
                 try {
-                    boolean ok = is.hi.H1.controllers.BookingController.book(hBooking);
+                    boolean ok = is.hi.H1.controllers.BookingController.createBooking(hBooking);
                     if (ok) {
                         booking.setHotelBooking(hBooking);
                     } else {

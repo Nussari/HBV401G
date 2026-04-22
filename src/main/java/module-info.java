@@ -13,4 +13,5 @@ module g1t.hbv401g {
 
     exports g1t.teamD.model;
     exports g1t.teamD.controller;
+    exports g1t.teamF.model;
 }

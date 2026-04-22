@@ -37,7 +37,7 @@
             <artifactId>H1</artifactId>
             <version>1.0</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/libs/H1-1.0.jar</systemPath>
+            <systemPath>${project.basedir}/libs/H1.jar</systemPath>
         </dependency>
 
         <dependency>

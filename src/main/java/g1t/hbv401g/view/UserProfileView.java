@@ -2,7 +2,7 @@ package g1t.hbv401g.view;
 
 import g1t.hbv401g.controller.BookingController;
 import g1t.hbv401g.model.Booking;
-import g1t.hbv401g.model.Flight;
+import g1t.teamF.model.Flight;
 import g1t.hbv401g.model.HotelSelection;
 import g1t.hbv401g.model.Trip;
 import g1t.hbv401g.model.User;
@@ -271,10 +271,12 @@ public class UserProfileView {
     private VBox buildBookingTotal(Booking b) {
         Label total = new Label(Formats.moneyInt(b.getTotal()));
         total.getStyleClass().add("booking-total");
+        total.setMinWidth(Region.USE_PREF_SIZE);
         Label lbl = new Label("TOTAL");
         lbl.getStyleClass().add("eyebrow");
         VBox right = new VBox(4, total, lbl);
         right.setAlignment(Pos.CENTER_RIGHT);
+        right.setMinWidth(Region.USE_PREF_SIZE);
         return right;
     }
 

@@ -1,7 +1,7 @@
 package g1t.hbv401g.view.search;
 
 import g1t.hbv401g.controller.SearchController;
-import g1t.hbv401g.model.Flight;
+import g1t.teamF.model.Flight;
 import g1t.hbv401g.model.HotelSelection;
 import g1t.hbv401g.view.util.Animations;
 import g1t.teamD.model.DayTrip;
@@ -57,6 +57,9 @@ public final class SearchResults {
         selectedReturn = null;
         selectedDayTrips.clear();
         selectedHotel = null;
+        for (Node n : new ArrayList<>(root.lookupAll(".selected"))) {
+            n.getStyleClass().remove("selected");
+        }
         onSelectionChange.run();
     }
 
@@ -152,9 +155,17 @@ public final class SearchResults {
         } else {
             TilePane grid = new TilePane(16, 16);
             grid.setPrefColumns(3);
+            List<Node> hotelCards = new ArrayList<>();
             for (HotelSelection sel : options) {
-                grid.getChildren().add(HotelCard.create(
-                        sel, sel == selectedHotel, this::toggleHotel));
+                Node card = HotelCard.create(sel, sel == selectedHotel, picked -> {
+                    boolean nowSelected = toggleHotel(picked);
+                    if (nowSelected) {
+                        for (Node other : hotelCards) other.getStyleClass().remove("selected");
+                    }
+                    return nowSelected;
+                });
+                hotelCards.add(card);
+                grid.getChildren().add(card);
             }
             section.getChildren().add(grid);
         }
