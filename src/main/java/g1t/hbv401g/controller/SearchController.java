@@ -1,21 +1,29 @@
 package g1t.hbv401g.controller;
 
 import g1t.hbv401g.db.Database;
-import g1t.hbv401g.model.Airport;
-import g1t.hbv401g.model.Flight;
+import g1t.hbv401g.model.HotelSelection;
+import g1t.teamF.model.Flight;
 import g1t.teamD.controller.DayTripController;
 import g1t.teamD.db.DayTripDB;
 import g1t.teamD.model.DayTrip;
+import is.hi.H1.controllers.BookingController;
+import is.hi.H1.controllers.HotelController;
+import is.hi.H1.model.Hotel;
+import is.hi.H1.model.Room;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SearchController {
 
     // private FlightSearchController flightSearchController; - setja inn þegar lið F skilar
-    // private HotelSearchController hotelSearchController; - setja inn þegar lið H skilar
     private final DayTripController dayTripController;
 
     public SearchController(DayTripController dayTripController) {
@@ -32,54 +40,19 @@ public class SearchController {
         this.dayTripController = ctrl;
     }
 
-    public record SearchResult(List<Flight> flights, List<DayTrip> dayTrips) {}
-
     // ná í alla staði fyrir view dropdowns
     public List<String> getPlaces() {
-        //return new ArrayList<>();
         return List.of("Reykjavik", "Copenhagen", "Stockholm", "Tokyo", "New York");
-    }
-
-    // heildar search
-    public SearchResult search(String originPlace,
-                                String destinationPlace,
-                                LocalDate startDate,
-                                LocalDate endDate,
-                                double priceMin,
-                                double priceMax,
-                                int travellerAmount,
-                                boolean searchFlights,
-                                boolean searchDayTrips,
-                                boolean searchHotels) {
-
-        List<Flight> flightResults = new ArrayList<>();
-        List<DayTrip> dayTripResults = new ArrayList<>();
-
-        if (searchFlights) {
-            flightResults.addAll(searchFlightsByPlace(originPlace, destinationPlace,
-                    startDate, endDate, priceMin, priceMax, travellerAmount));
-        }
-
-        if (searchDayTrips) {
-            dayTripResults.addAll(searchDayTrips(destinationPlace, travellerAmount,
-                    startDate, endDate, priceMin, priceMax));
-        }
-
-        if (searchHotels) {
-            // seinna
-        }
-
-        return new SearchResult(flightResults, dayTripResults);
     }
 
     // Flight search - sérhannað til að geta leiðað eftir borgum, ekki flugvöllum
     public List<Flight> searchFlightsByPlace(String originPlace,
-                                            String destinationPlace,
-                                            LocalDate startDate,
-                                            LocalDate endDate,
-                                            double priceMin,
-                                            double priceMax,
-                                            int travellerAmount) {
+                                             String destinationPlace,
+                                             LocalDate startDate,
+                                             LocalDate endDate,
+                                             double priceMin,
+                                             double priceMax,
+                                             int travellerAmount) {
         /*
         List<Airport> originAirports = findAirportsByPlace(originPlace);
         List<Airport> destinationAirports = findAirportsByPlace(destinationPlace);
@@ -147,8 +120,56 @@ public class SearchController {
         }
     }
 
-    // Hotel search
-    public List<String> searchHotels(String location, LocalDate checkIn, LocalDate checkOut) {
-        return new ArrayList<>();
+    // Hotel search - pakkar fyrstu booking-tillögu hvers hótels í HotelSelection
+    public List<HotelSelection> searchHotelSelections(LocalDate checkIn, LocalDate checkOut,
+                                                      String place, int capacity) {
+        List<HotelSelection> result = new ArrayList<>();
+        if (checkIn == null || checkOut == null || place == null || place.isBlank()) return result;
+        if (!checkOut.isAfter(checkIn)) return result;
+
+        Hotel[] hotels;
+        try {
+            hotels = HotelController.getHotels(checkIn, checkOut, place, capacity);
+        } catch (Exception e) {
+            System.err.println("[search] hotel search failed: " + e.getMessage());
+            return result;
+        }
+        if (hotels == null) return result;
+
+        // hardcoded villa í db.getHotels hjá H, þetta er patch fyrir það
+        patchRoomPrices(hotels);
+
+        for (Hotel h : hotels) {
+            try {
+                Room[] bestRooms = BookingController.getBestBookingOption(h, capacity);
+                if (bestRooms == null || bestRooms.length == 0) continue;
+                result.add(new HotelSelection(h, bestRooms, checkIn, checkOut, place));
+            } catch (Exception e) {
+                System.err.println("[search] getBestBookingOption failed: " + e.getMessage());
+            }
+        }
+        return result;
+    }
+
+    private static void patchRoomPrices(Hotel[] hotels) {
+        Connection conn = Database.teamH();
+        if (conn == null) return;
+        Map<Integer, Integer> prices = new HashMap<>();
+        try (PreparedStatement ps = conn.prepareStatement(
+                "SELECT room_id, price_per_night FROM rooms");
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) prices.put(rs.getInt(1), rs.getInt(2));
+        } catch (SQLException e) {
+            System.err.println("[search] price patch query failed: " + e.getMessage());
+            return;
+        }
+        for (Hotel h : hotels) {
+            Room[] rooms = h.getRooms();
+            if (rooms == null) continue;
+            for (Room r : rooms) {
+                Integer p = prices.get(r.getId());
+                if (p != null) r.setPricePerNight(p);
+            }
+        }
     }
 }

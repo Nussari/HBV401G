@@ -1,10 +1,12 @@
 package g1t.hbv401g.view;
 
+import g1t.hbv401g.controller.BookingController;
 import g1t.hbv401g.model.Booking;
-import g1t.teamD.model.DayTrip;
-import g1t.hbv401g.model.Flight;
+import g1t.teamF.model.Flight;
+import g1t.hbv401g.model.HotelSelection;
 import g1t.hbv401g.model.Trip;
 import g1t.hbv401g.model.User;
+import g1t.teamD.model.DayTrip;
 import g1t.hbv401g.view.components.InfoRow;
 import g1t.hbv401g.view.components.TripTitleEditor;
 import g1t.hbv401g.view.state.AppState;
@@ -215,12 +217,40 @@ public class UserProfileView {
         HBox.setHgrow(info, Priority.ALWAYS);
 
         VBox right = buildBookingTotal(b);
+        right.getChildren().add(buildCancelButton(b));
 
         HBox row = new HBox(22, info, right);
         row.getStyleClass().add("border-bottom");
         row.setAlignment(Pos.CENTER_LEFT);
         row.setPadding(new Insets(20, 0, 20, 0));
         return row;
+    }
+
+    private Button buildCancelButton(Booking b) {
+        Button cancel = new Button("Cancel");
+        cancel.getStyleClass().addAll("edit-link", "fs-11");
+        cancel.setOnAction(e -> cancelBooking(b));
+        return cancel;
+    }
+
+    private void cancelBooking(Booking b) {
+        BookingController.CancellationResult result = AppState.get().cancelBooking(b);
+        switch (result) {
+            case HOTEL_REQUIRES_PHONE -> showInfo("Hotel cancellation",
+                    "Please call the hotel directly to cancel your reservation.");
+            case FAILED -> showInfo("Cancellation failed",
+                    "We couldn't cancel that booking. Please try again.");
+            case CANCELLED -> { /* listeners refresh the view */ }
+        }
+    }
+
+    private void showInfo(String title, String message) {
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+                javafx.scene.control.Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     private Label buildBookingSummary(Booking b) {
@@ -241,10 +271,12 @@ public class UserProfileView {
     private VBox buildBookingTotal(Booking b) {
         Label total = new Label(Formats.moneyInt(b.getTotal()));
         total.getStyleClass().add("booking-total");
+        total.setMinWidth(Region.USE_PREF_SIZE);
         Label lbl = new Label("TOTAL");
         lbl.getStyleClass().add("eyebrow");
         VBox right = new VBox(4, total, lbl);
         right.setAlignment(Pos.CENTER_RIGHT);
+        right.setMinWidth(Region.USE_PREF_SIZE);
         return right;
     }
 
@@ -263,6 +295,12 @@ public class UserProfileView {
                 sb.append("  ref ").append(b.getFlightBookings().get(flightIdx).getBookingReference());
             }
             flightIdx++;
+        }
+        HotelSelection hotel = t.getHotel();
+        if (hotel != null) {
+            if (sb.length() > 0) sb.append("  \u00B7  ");
+            sb.append("Hotel: ").append(hotel.getHotel().getName());
+            sb.append("  ").append(hotel.getCheckIn()).append("\u2192").append(hotel.getCheckOut());
         }
         for (DayTrip dt : t.getDayTrips()) {
             if (sb.length() > 0) sb.append("  \u00B7  ");

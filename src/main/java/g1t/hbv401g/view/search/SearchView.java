@@ -2,7 +2,6 @@ package g1t.hbv401g.view.search;
 
 import g1t.hbv401g.controller.SearchController;
 import g1t.teamD.model.DayTrip;
-import g1t.hbv401g.model.Flight;
 import g1t.hbv401g.view.ViewRouter;
 import g1t.hbv401g.view.state.AppState;
 import javafx.geometry.Insets;
@@ -88,6 +87,10 @@ public final class SearchView {
             count++;
             total += dt.getPrice();
         }
+        if (results.selectedHotel() != null) {
+            count++;
+            total += results.selectedHotel().getTotalCost();
+        }
         summary.refresh(count, total);
     }
 
@@ -99,7 +102,8 @@ public final class SearchView {
             return;
         }
 
-        AppState.get().addSelectionToCart(results.selectedDayTrips());
+        AppState.get().addSelectionToCart(
+                results.selectedDayTrips(), results.selectedHotel());
 
         results.clearSelection();
         ViewRouter.get().openCart();

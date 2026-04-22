@@ -1,9 +1,11 @@
 package g1t.hbv401g.view.search;
 
 import g1t.hbv401g.controller.SearchController;
-import g1t.teamD.model.DayTrip;
-import g1t.hbv401g.model.Flight;
+import g1t.teamF.model.Flight;
+import g1t.hbv401g.model.HotelSelection;
 import g1t.hbv401g.view.util.Animations;
+import g1t.teamD.model.DayTrip;
+
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -29,6 +31,7 @@ public final class SearchResults {
     private Flight selectedOut;
     private Flight selectedReturn;
     private final Set<DayTrip> selectedDayTrips = new LinkedHashSet<>();
+    private HotelSelection selectedHotel;
 
     public SearchResults(SearchController controller, Runnable onSelectionChange) {
         this.controller = controller;
@@ -42,15 +45,21 @@ public final class SearchResults {
     public Flight selectedOut() { return selectedOut; }
     public Flight selectedReturn() { return selectedReturn; }
     public List<DayTrip> selectedDayTrips() { return new ArrayList<>(selectedDayTrips); }
+    public HotelSelection selectedHotel() { return selectedHotel; }
 
     public boolean hasAnySelection() {
-        return selectedOut != null || selectedReturn != null || !selectedDayTrips.isEmpty();
+        return selectedOut != null || selectedReturn != null
+                || !selectedDayTrips.isEmpty() || selectedHotel != null;
     }
 
     public void clearSelection() {
         selectedOut = null;
         selectedReturn = null;
         selectedDayTrips.clear();
+        selectedHotel = null;
+        for (Node n : new ArrayList<>(root.lookupAll(".selected"))) {
+            n.getStyleClass().remove("selected");
+        }
         onSelectionChange.run();
     }
 
@@ -75,7 +84,7 @@ public final class SearchResults {
         }
 
         if (filters.includeFlights()) root.getChildren().add(flightSection("Flight out", outbound, true));
-        if (filters.includeHotels())  root.getChildren().add(hotelSection());
+        if (filters.includeHotels())  root.getChildren().add(hotelSection(form));
         if (filters.includeEvents())  root.getChildren().add(eventsSection(filters, form));
         if (filters.includeFlights()) root.getChildren().add(flightSection("Flight home", inbound, false));
 
@@ -118,11 +127,54 @@ public final class SearchResults {
         return section;
     }
 
-    private VBox hotelSection() {
-        VBox section = new VBox(12);
-        section.getChildren().add(sectionHead("Hotel", "0 OPTIONS"));
-        section.getChildren().add(emptyRow("Hotels coming soon."));
+    private VBox hotelSection(SearchForm form) {
+        VBox section = new VBox(16);
+        List<HotelSelection> options = fetchHotelSelections(form);
+
+        // keep prior selection only if it's still a match (same hotel name & dates)
+        if (selectedHotel != null) {
+            boolean stillValid = false;
+            for (HotelSelection o : options) {
+                if (o.getHotel().getName().equals(selectedHotel.getHotel().getName())
+                        && o.getCheckIn().equals(selectedHotel.getCheckIn())
+                        && o.getCheckOut().equals(selectedHotel.getCheckOut())) {
+                    selectedHotel = o;
+                    stillValid = true;
+                    break;
+                }
+            }
+            if (!stillValid) selectedHotel = null;
+        }
+
+        section.getChildren().add(sectionHead("Hotel",
+                options.size() + " OPTIONS  \u00B7  PICK ONE"));
+
+        if (options.isEmpty()) {
+            section.getChildren().add(emptyRow(
+                    "No hotels match. Change destination, dates, or traveller count."));
+        } else {
+            TilePane grid = new TilePane(16, 16);
+            grid.setPrefColumns(3);
+            List<Node> hotelCards = new ArrayList<>();
+            for (HotelSelection sel : options) {
+                Node card = HotelCard.create(sel, sel == selectedHotel, picked -> {
+                    boolean nowSelected = toggleHotel(picked);
+                    if (nowSelected) {
+                        for (Node other : hotelCards) other.getStyleClass().remove("selected");
+                    }
+                    return nowSelected;
+                });
+                hotelCards.add(card);
+                grid.getChildren().add(card);
+            }
+            section.getChildren().add(grid);
+        }
         return section;
+    }
+
+    private List<HotelSelection> fetchHotelSelections(SearchForm form) {
+        return controller.searchHotelSelections(
+                form.depart(), form.returnOn(), form.to(), form.travellers());
     }
 
     private VBox eventsSection(SearchFilters filters, SearchForm form) {
@@ -171,6 +223,13 @@ public final class SearchResults {
             selectedDayTrips.add(t);
             nowSelected = true;
         }
+        onSelectionChange.run();
+        return nowSelected;
+    }
+
+    private boolean toggleHotel(HotelSelection sel) {
+        boolean nowSelected = (selectedHotel != sel);
+        selectedHotel = nowSelected ? sel : null;
         onSelectionChange.run();
         return nowSelected;
     }

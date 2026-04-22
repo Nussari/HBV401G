@@ -1,6 +1,7 @@
 package g1t.hbv401g.controller;
 
 import g1t.hbv401g.model.Cart;
+import g1t.hbv401g.model.HotelSelection;
 import g1t.hbv401g.model.Trip;
 import g1t.hbv401g.model.User;
 import g1t.teamD.model.DayTrip;
@@ -15,15 +16,20 @@ public class CartController {
         return user.getCart().addTrip(trip);
     }
 
-    public boolean addSelection(User user, List<DayTrip> dayTrips) {
-        if (user == null || dayTrips == null || dayTrips.isEmpty()) return false;
-        Trip trip = new Trip(buildDefaultName(dayTrips));
-        for (DayTrip d : dayTrips) trip.addDayTrip(d);
+    public boolean addSelection(User user, List<DayTrip> dayTrips, HotelSelection hotel) {
+        if (user == null) return false;
+        boolean hasDayTrips = dayTrips != null && !dayTrips.isEmpty();
+        if (!hasDayTrips && hotel == null) return false;
+        Trip trip = new Trip(buildDefaultName(dayTrips, hotel));
+        if (hasDayTrips) for (DayTrip d : dayTrips) trip.addDayTrip(d);
+        if (hotel != null && !trip.setHotel(hotel)) return false;
         return addTrip(user, trip);
     }
 
-    private String buildDefaultName(List<DayTrip> dayTrips) {
-        String dest = dayTrips.get(0).getPlace();
+    private String buildDefaultName(List<DayTrip> dayTrips, HotelSelection hotel) {
+        String dest = null;
+        if (dayTrips != null && !dayTrips.isEmpty()) dest = dayTrips.get(0).getPlace();
+        if ((dest == null || dest.isBlank()) && hotel != null) dest = hotel.getPlace();
         return (dest == null || dest.isBlank()) ? "Trip" : "Trip to " + dest;
     }
 

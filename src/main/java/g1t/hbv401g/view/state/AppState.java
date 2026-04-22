@@ -7,6 +7,7 @@ import g1t.hbv401g.db.Database;
 import g1t.hbv401g.demo.DemoDataLoader;
 import g1t.hbv401g.model.Booking;
 import g1t.hbv401g.model.Cart;
+import g1t.hbv401g.model.HotelSelection;
 import g1t.hbv401g.model.Trip;
 import g1t.hbv401g.model.User;
 import g1t.teamD.model.DayTrip;
@@ -91,9 +92,9 @@ public final class AppState {
         return ok;
     }
 
-    public boolean addSelectionToCart(List<DayTrip> dayTrips) {
+    public boolean addSelectionToCart(List<DayTrip> dayTrips, HotelSelection hotel) {
         if (!isLoggedIn()) return false;
-        boolean ok = cartController.addSelection(currentUser, dayTrips);
+        boolean ok = cartController.addSelection(currentUser, dayTrips, hotel);
         if (ok) notifyListeners();
         return ok;
     }
@@ -125,6 +126,13 @@ public final class AppState {
         List<Booking> created = bookingController.checkout(currentUser);
         notifyListeners();
         return created;
+    }
+
+    public BookingController.CancellationResult cancelBooking(Booking booking) {
+        if (!isLoggedIn()) return BookingController.CancellationResult.FAILED;
+        BookingController.CancellationResult result = bookingController.cancelBooking(currentUser, booking);
+        if (result == BookingController.CancellationResult.CANCELLED) notifyListeners();
+        return result;
     }
 
     public void subscribe(Runnable r) { listeners.add(r); }
