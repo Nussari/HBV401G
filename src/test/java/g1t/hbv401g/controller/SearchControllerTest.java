@@ -1,6 +1,6 @@
 package g1t.hbv401g.controller;
 
-import g1t.hbv401g.model.Flight;
+import g1t.teamF.model.Flight;
 
 import java.time.LocalDate;
 import java.util.List;

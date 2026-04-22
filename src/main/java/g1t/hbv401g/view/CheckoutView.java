@@ -4,6 +4,7 @@ import g1t.hbv401g.model.Booking;
 import g1t.hbv401g.model.Cart;
 import g1t.teamD.model.DayTrip;
 import g1t.teamF.model.Flight;
+import g1t.hbv401g.model.HotelSelection;
 import g1t.hbv401g.model.Trip;
 import g1t.hbv401g.view.components.ComponentRow;
 import g1t.hbv401g.view.components.TripTitleEditor;
@@ -163,6 +164,11 @@ public class CheckoutView {
         for (Flight f : trip.getFlights()) {
             components.getChildren().add(
                     ComponentRow.readOnly("FLI", Formats.flightLong(f), f.getPrice()));
+        }
+        HotelSelection hotel = trip.getHotel();
+        if (hotel != null) {
+            components.getChildren().add(
+                    ComponentRow.readOnly("HTL", Formats.hotelLong(hotel), hotel.getTotalCost()));
         }
         for (DayTrip dt : trip.getDayTrips()) {
             components.getChildren().add(

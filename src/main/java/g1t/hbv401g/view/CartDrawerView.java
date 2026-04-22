@@ -1,9 +1,10 @@
 package g1t.hbv401g.view;
 
 import g1t.hbv401g.model.Cart;
-import g1t.teamD.model.DayTrip;
 import g1t.teamF.model.Flight;
+import g1t.hbv401g.model.HotelSelection;
 import g1t.hbv401g.model.Trip;
+import g1t.teamD.model.DayTrip;
 import g1t.hbv401g.view.components.ComponentRow;
 import g1t.hbv401g.view.components.TripTitleEditor;
 import g1t.hbv401g.view.state.AppState;
@@ -204,6 +205,12 @@ public class CartDrawerView {
         for (Flight f : trip.getFlights()) {
             components.getChildren().add(
                     ComponentRow.removable("FLI", Formats.flightShort(f), f.getPrice(), trip, f));
+        }
+        HotelSelection hotel = trip.getHotel();
+        if (hotel != null) {
+            components.getChildren().add(
+                    ComponentRow.removable("HTL", Formats.hotelShort(hotel),
+                            hotel.getTotalCost(), trip, hotel));
         }
         for (DayTrip dt : trip.getDayTrips()) {
             components.getChildren().add(

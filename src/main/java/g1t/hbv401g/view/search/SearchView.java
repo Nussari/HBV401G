@@ -92,6 +92,10 @@ public final class SearchView {
             count++;
             total += flight.getPrice();
         }
+        if (results.selectedHotel() != null) {
+            count++;
+            total += results.selectedHotel().getTotalCost();
+        }
         summary.refresh(count, total);
     }
 
@@ -103,7 +107,8 @@ public final class SearchView {
             return;
         }
 
-        AppState.get().addSelectionToCart(results.selectedDayTrips());
+        AppState.get().addSelectionToCart(
+                results.selectedDayTrips(), results.selectedHotel());
 
         results.clearSelection();
         ViewRouter.get().openCart();

@@ -12,8 +12,8 @@ public class Trip {
 
     private String defaultName;
     private String customName;
-    private final List<Flight> flights = new ArrayList<>();
     private final List<DayTrip> dayTrips = new ArrayList<>();
+    private HotelSelection hotel;
 
     public Trip(String defaultName) {
         this.defaultName = defaultName;
@@ -33,40 +33,47 @@ public class Trip {
         this.customName = (name == null || name.isBlank()) ? null : name.trim();
     }
 
-    public List<Flight> getFlights() { return Collections.unmodifiableList(flights); }
     public List<DayTrip> getDayTrips() { return Collections.unmodifiableList(dayTrips); }
+    public HotelSelection getHotel() { return hotel; }
 
-    public boolean addFlight(Flight flight) {
-        if (flight == null || flights.contains(flight)) return false;
-        return flights.add(flight);
-    }
+
+    public List<Flight> getFlights() { return Collections.emptyList(); }
+
+    public boolean addFlight(Flight flight) { return false; }
+    public boolean removeFlight(Flight flight) { return false; }
 
     public boolean addDayTrip(DayTrip dayTrip) {
         if (dayTrip == null || dayTrips.contains(dayTrip)) return false;
         return dayTrips.add(dayTrip);
     }
 
-    public boolean removeFlight(Flight flight) { return flights.remove(flight); }
+    public boolean setHotel(HotelSelection selection) {
+        this.hotel = selection;
+        return true;
+    }
+
     public boolean removeDayTrip(DayTrip dayTrip) { return dayTrips.remove(dayTrip); }
+    public void removeHotel() { this.hotel = null; }
 
     public boolean removeComponent(Object component) {
-        if (component instanceof Flight f) return removeFlight(f);
+        if (component instanceof Flight f) return removeFlight(f);   // STUB FOR REMOVAL
         if (component instanceof DayTrip d) return removeDayTrip(d);
+        if (component instanceof HotelSelection h && h == hotel) { removeHotel(); return true; }
         return false;
     }
 
     public double getTotalCost() {
         double total = 0;
-        for (Flight f : flights) total += f.getPrice();
         for (DayTrip d : dayTrips) total += d.getPrice();
+        if (hotel != null) total += hotel.getTotalCost();
         return total;
     }
 
     public boolean hasComponent() {
-        return !flights.isEmpty() || !dayTrips.isEmpty();
+        return !dayTrips.isEmpty() || hotel != null;
     }
 
     public int getComponentCount() {
-        return flights.size() + dayTrips.size();
+        return dayTrips.size() + (hotel != null ? 1 : 0);
     }
 }

@@ -1,7 +1,6 @@
 package g1t.hbv401g.view.search;
 
 import g1t.teamF.model.Flight;
-import java.time.Duration;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;

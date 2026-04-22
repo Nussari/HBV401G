@@ -2,6 +2,7 @@ package g1t.hbv401g.controller;
 
 import g1t.hbv401g.db.Database;
 import g1t.hbv401g.model.Booking;
+import g1t.hbv401g.model.HotelSelection;
 import g1t.hbv401g.model.Trip;
 import g1t.hbv401g.model.User;
 import g1t.teamD.controller.DayTripBookingController;
@@ -93,6 +94,26 @@ public class BookingController {
                 }
             }
 
+            HotelSelection hotel = trip.getHotel();
+            if (hotel != null) {
+                is.hi.H1.model.Booking hBooking = new is.hi.H1.model.Booking(
+                        hotel.getCheckIn(),
+                        hotel.getCheckOut(),
+                        hotel.getRooms(),
+                        user.getEmail(),
+                        false);
+                try {
+                    boolean ok = is.hi.H1.controllers.BookingController.createBooking(hBooking);
+                    if (ok) {
+                        booking.setHotelBooking(hBooking);
+                    } else {
+                        System.err.println("[booking] hotel booking rejected by H1");
+                    }
+                } catch (Exception e) {
+                    System.err.println("[booking] hotel booking failed: " + e.getMessage());
+                }
+            }
+
             user.addBooking(booking);
             created.add(booking);
         }
@@ -101,8 +122,28 @@ public class BookingController {
         return created;
     }
 
-    public boolean cancelBooking(User user, Booking booking) {
-        if (user == null || booking == null) return false;
-        return user.removeBooking(booking);
+    public enum CancellationResult { CANCELLED, HOTEL_REQUIRES_PHONE, FAILED }
+
+    public CancellationResult cancelBooking(User user, Booking booking) {
+        if (user == null || booking == null) return CancellationResult.FAILED;
+        if (booking.hasHotelBooking()) return CancellationResult.HOTEL_REQUIRES_PHONE;
+        return user.removeBooking(booking) ? CancellationResult.CANCELLED : CancellationResult.FAILED;
+    }
+
+    public CancellationResult cancelBookingComponent(User user, Booking booking, Object component) {
+        if (user == null || booking == null || component == null) return CancellationResult.FAILED;
+        if (component instanceof HotelSelection) return CancellationResult.HOTEL_REQUIRES_PHONE;
+
+        Trip trip = booking.getTrip();
+        if (trip == null || !trip.removeComponent(component)) return CancellationResult.FAILED;
+
+        if (component instanceof DayTrip dt) {
+            booking.removeDayTripBookingByTripID(dt.getTripID());
+        }
+
+        if (!trip.hasComponent() && !booking.hasHotelBooking()) {
+            user.removeBooking(booking);
+        }
+        return CancellationResult.CANCELLED;
     }
 }

@@ -1,16 +1,20 @@
 package g1t.hbv401g.view;
 
+import g1t.hbv401g.controller.BookingController;
 import g1t.hbv401g.model.Booking;
 import g1t.teamD.model.DayTrip;
 import g1t.teamF.model.Flight;
+import g1t.hbv401g.model.HotelSelection;
 import g1t.hbv401g.model.Trip;
 import g1t.hbv401g.model.User;
+import g1t.hbv401g.view.components.ComponentRow;
 import g1t.hbv401g.view.components.InfoRow;
 import g1t.hbv401g.view.components.TripTitleEditor;
 import g1t.hbv401g.view.state.AppState;
 import g1t.hbv401g.view.util.Formats;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -92,7 +96,11 @@ public class UserProfileView {
         ColumnConstraints c2 = new ColumnConstraints(); c2.setPercentWidth(58);
         grid.getColumnConstraints().addAll(c1, c2);
 
-        grid.add(buildAccountPanel(), 0, 0);
+        VBox accountPanel = buildAccountPanel();
+        GridPane.setValignment(accountPanel, VPos.TOP);
+        GridPane.setFillHeight(accountPanel, false);
+
+        grid.add(accountPanel, 0, 0);
         grid.add(buildBookingsPanel(), 1, 0);
         return grid;
     }
@@ -187,7 +195,7 @@ public class UserProfileView {
         HBox titleRow = new HBox(12, title, dash);
         titleRow.setAlignment(Pos.BASELINE_LEFT);
 
-        VBox items = new VBox();
+        VBox items = new VBox(18);
         VBox.setMargin(items, new Insets(20, 0, 0, 0));
 
         if (s.getBookings().isEmpty()) {
@@ -196,8 +204,11 @@ public class UserProfileView {
             items.setPadding(new Insets(20, 0, 0, 0));
             items.getChildren().setAll(empty);
         } else {
+            int i = 1;
+            int total = s.getBookings().size();
             for (Booking b : s.getBookings()) {
-                items.getChildren().add(buildBookingRow(b));
+                items.getChildren().add(buildBookingCard(b, i, total));
+                i++;
             }
         }
 
@@ -205,28 +216,35 @@ public class UserProfileView {
         return panel;
     }
 
-    private HBox buildBookingRow(Booking b) {
+    private VBox buildBookingCard(Booking b, int index, int total) {
         Trip trip = b.getTrip();
+        VBox card = new VBox(12);
+        card.getStyleClass().add("trip-card");
+        card.setPadding(new Insets(16, 16, 14, 16));
 
-        VBox info = new VBox(6,
-                trip == null ? new Label("") : TripTitleEditor.create(trip, "booking-title"),
-                buildBookingSummary(b),
-                buildBookingBadges(b));
-        HBox.setHgrow(info, Priority.ALWAYS);
-
-        VBox right = buildBookingTotal(b);
-
-        HBox row = new HBox(22, info, right);
-        row.getStyleClass().add("border-bottom");
-        row.setAlignment(Pos.CENTER_LEFT);
-        row.setPadding(new Insets(20, 0, 20, 0));
-        return row;
+        card.getChildren().setAll(
+                buildBookingEyebrowRow(b, index, total),
+                trip == null ? new Label("") : TripTitleEditor.create(trip, "trip-card-title"),
+                buildBookingBadges(b),
+                buildIncludesLabel(),
+                buildBookingComponentList(b),
+                buildBookingFooterRow(b));
+        return card;
     }
 
-    private Label buildBookingSummary(Booking b) {
-        Label summary = new Label(describeComponents(b));
-        summary.getStyleClass().addAll("mono", "fs-11");
-        return summary;
+    private HBox buildBookingEyebrowRow(Booking b, int index, int total) {
+        Label tag = new Label(String.format("BOOKING %02d / %02d", index, total));
+        tag.getStyleClass().addAll("eyebrow", "trip-card-tag");
+
+        Region sp = new Region();
+        HBox.setHgrow(sp, Priority.ALWAYS);
+
+        Label bookingTotal = new Label(Formats.money(b.getTotal()));
+        bookingTotal.getStyleClass().add("cart-trip-total");
+
+        HBox row = new HBox(10, tag, sp, bookingTotal);
+        row.setAlignment(Pos.CENTER_LEFT);
+        return row;
     }
 
     private HBox buildBookingBadges(Booking b) {
@@ -238,37 +256,81 @@ public class UserProfileView {
         return new HBox(6, status, items);
     }
 
-    private VBox buildBookingTotal(Booking b) {
-        Label total = new Label(Formats.moneyInt(b.getTotal()));
-        total.getStyleClass().add("booking-total");
-        Label lbl = new Label("TOTAL");
-        lbl.getStyleClass().add("eyebrow");
-        VBox right = new VBox(4, total, lbl);
-        right.setAlignment(Pos.CENTER_RIGHT);
-        return right;
+    private Label buildIncludesLabel() {
+        Label l = new Label("INCLUDES");
+        l.getStyleClass().add("cart-includes");
+        return l;
     }
 
-    private String describeComponents(Booking b) {
-        Trip t = b.getTrip();
-        if (t == null) return "";
-        StringBuilder sb = new StringBuilder();
-        int flightIdx = 0;
-        for (Flight f : t.getFlights()) {
-            if (sb.length() > 0) sb.append("  \u00B7  ");
-            sb.append("Flight ")
-              .append(f.getDepartureAirport().getCode())
-              .append("\u2192")
-              .append(f.getArrivalAirport().getCode());
-            if (flightIdx < b.getFlightBookings().size()) {
-                sb.append("  ref ").append(b.getFlightBookings().get(flightIdx).getBookingReference());
+    private VBox buildBookingComponentList(Booking b) {
+        VBox components = new VBox(6);
+        components.getStyleClass().add("trip-card-components");
+        components.setPadding(new Insets(10, 12, 10, 12));
+
+        Trip trip = b.getTrip();
+        if (trip != null) {
+            for (Flight f : trip.getFlights()) {
+                components.getChildren().add(ComponentRow.cancellable(
+                        "FLI", Formats.flightShort(f), f.getPrice(),
+                        () -> cancelBookingComponent(b, f)));
             }
-            flightIdx++;
+            HotelSelection hotel = trip.getHotel();
+            if (hotel != null) {
+                components.getChildren().add(ComponentRow.cancellable(
+                        "HTL", Formats.hotelShort(hotel), hotel.getTotalCost(),
+                        () -> cancelBookingComponent(b, hotel)));
+            }
+            for (DayTrip dt : trip.getDayTrips()) {
+                components.getChildren().add(ComponentRow.cancellable(
+                        "DAY", Formats.dayTripShort(dt), dt.getPrice(),
+                        () -> cancelBookingComponent(b, dt)));
+            }
         }
-        for (DayTrip dt : t.getDayTrips()) {
-            if (sb.length() > 0) sb.append("  \u00B7  ");
-            sb.append("Day-trip: ").append(dt.getName());
+        if (components.getChildren().isEmpty()) {
+            Label none = new Label("No items");
+            none.getStyleClass().add("muted");
+            components.getChildren().add(none);
         }
-        return sb.toString();
+        return components;
+    }
+
+    private HBox buildBookingFooterRow(Booking b) {
+        Button cancel = new Button("Cancel booking");
+        cancel.getStyleClass().addAll("edit-link", "fs-11");
+        cancel.setOnAction(e -> cancelBooking(b));
+
+        Region sp = new Region();
+        HBox.setHgrow(sp, Priority.ALWAYS);
+
+        HBox footer = new HBox(sp, cancel);
+        return footer;
+    }
+
+    private void cancelBooking(Booking b) {
+        handleCancellationResult(AppState.get().cancelBooking(b));
+    }
+
+    private void cancelBookingComponent(Booking b, Object component) {
+        handleCancellationResult(AppState.get().cancelBookingComponent(b, component));
+    }
+
+    private void handleCancellationResult(BookingController.CancellationResult result) {
+        switch (result) {
+            case HOTEL_REQUIRES_PHONE -> showInfo("Hotel cancellation",
+                    "Please call the hotel directly to cancel your reservation.");
+            case FAILED -> showInfo("Cancellation failed",
+                    "We couldn't cancel that. Please try again.");
+            case CANCELLED -> { /* listeners refresh the view */ }
+        }
+    }
+
+    private void showInfo(String title, String message) {
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+                javafx.scene.control.Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     private StackPane buildLoggedOut() {
