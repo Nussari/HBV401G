@@ -10,10 +10,16 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.function.Function;
 
 
 public final class FlightRow {
+
+    private static final DateTimeFormatter DATE_FMT =
+            DateTimeFormatter.ofPattern("EEE, MMM d", Locale.ENGLISH);
 
     private FlightRow() {}
 
@@ -25,9 +31,9 @@ public final class FlightRow {
         row.getChildren().setAll(
                 checkBadge(outbound),
                 airlineBlock(f),
-                time(f.getDepartureTime().toString()),
+                timeBlock(f.getDepartureDate(), f.getDepartureTime().toString()),
                 arrow(),
-                time(f.getArrivalTime().toString()),
+                timeBlock(f.getArrivalDate(), f.getArrivalTime().toString()),
                 routeBlock(f),
                 grow(),
                 price(f));
@@ -63,10 +69,14 @@ public final class FlightRow {
         return new VBox(2, name, id);
     }
 
-    private static Label time(String text) {
-        Label l = new Label(text);
-        l.getStyleClass().add("flight-time");
-        return l;
+    private static VBox timeBlock(LocalDate date, String timeText) {
+        Label d = new Label(DATE_FMT.format(date));
+        d.getStyleClass().addAll("mono", "fs-11", "muted");
+        Label t = new Label(timeText);
+        t.getStyleClass().add("flight-time");
+        VBox box = new VBox(2, d, t);
+        box.setAlignment(Pos.CENTER_LEFT);
+        return box;
     }
 
     private static Label arrow() {

@@ -11,43 +11,53 @@ import g1t.teamD.db.DayTripDB;
 import g1t.teamD.model.DayTrip;
 import g1t.teamD.model.DayTripBooking;
 import g1t.teamD.model.DayTripBookingResult;
+import g1t.teamF.controller.FlightBookingController;
+import g1t.teamF.db.BookingDAO;
+import g1t.teamF.model.Flight;
+import g1t.teamF.model.Seat;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import g1t.teamF.controller.*;
-import g1t.teamF.model.*;
-import g1t.teamF.db.*;
 
 
 public class BookingController {
 
-    // private FlightBookingController flightBookingController; - setja inn þegar lið F skilar
     private final DayTripBookingController dayTripBookingController;
+    private final DayTripDB dayTripDB;
+    private final DayTripBookingDB dayTripBookingDB;
     private final FlightBookingController flightBookingController;
 
-    public BookingController(DayTripBookingController dayTripBookingController, FlightBookingController flightBookingController) {
+    public BookingController(DayTripBookingController dayTripBookingController,
+                             DayTripDB dayTripDB,
+                             DayTripBookingDB dayTripBookingDB,
+                             FlightBookingController flightBookingController) {
         this.dayTripBookingController = dayTripBookingController;
+        this.dayTripDB = dayTripDB;
+        this.dayTripBookingDB = dayTripBookingDB;
         this.flightBookingController = flightBookingController;
     }
 
     public BookingController() {
         DayTripBookingController ctrl = null;
+        DayTripDB tripDB = null;
+        DayTripBookingDB bookingDB = null;
         FlightBookingController fctrl = null;
         try {
-            DayTripDB tripDB = new DayTripDB(Database.teamD());
-            DayTripBookingDB bookingDB = new DayTripBookingDB(Database.teamD());
+            tripDB = new DayTripDB(Database.teamD());
+            bookingDB = new DayTripBookingDB(Database.teamD());
             ctrl = new DayTripBookingController(bookingDB, tripDB);
         } catch (SQLException e) {
             System.err.println("[booking] team D init failed: " + e.getMessage());
         }
         try {
-            BookingDAO flightBookingDB = new BookingDAO();
-            fctrl = new FlightBookingController(flightBookingDB);
+            fctrl = new FlightBookingController(new BookingDAO());
         } catch (Exception e) {
-            System.err.println("[booking] team D init failed: " + e.getMessage());
+            System.err.println("[booking] team F init failed: " + e.getMessage());
         }
         this.dayTripBookingController = ctrl;
+        this.dayTripDB = tripDB;
+        this.dayTripBookingDB = bookingDB;
         this.flightBookingController = fctrl;
     }
 
@@ -60,23 +70,20 @@ public class BookingController {
         for (Trip trip : trips) {
             Booking booking = new Booking(trip);
 
-            // Flight booking: bíður eftir F innleiðingu
-            // for (Flight flight : trip.getFlights()) {
-            //     FlightBooking fb = flightBookingController.createBooking(flight, null, 1);
-            //     if (fb != null) {
-            //         flightBookingController.confirmBooking(fb);
-            //         booking.addFlightBooking(fb);
-            //     }
-            // }
             if (flightBookingController != null) {
-                for (Flight flight : trip.getFlights()){
-                    g1t.teamF.model.Booking fBooking = 
-                    flightBookingController.createBooking(flight, flight, 1);
-                    fBooking.confirm();
-                    if (fBooking.getStatus() == BookingStatus.CONFIRMED){
+                for (Flight flight : trip.getFlights()) {
+                    g1t.teamF.model.Booking fBooking =
+                            flightBookingController.createBooking(flight, null, 1);
+                    if (fBooking == null) continue;
+
+                    // F liðið krefst þess að sæti sé valið fyrir hvern farþega áður en staðfest er
+                    List<Seat> available = flight.getAvailableSeats();
+                    if (available.isEmpty()) continue;
+                    if (!flightBookingController.chooseSeat(fBooking, flight, available.get(0))) continue;
+
+                    if (flightBookingController.confirmBooking(fBooking)) {
                         booking.addFlightBooking(fBooking);
                     }
-
                 }
             }
             if (dayTripBookingController != null) {
@@ -127,6 +134,16 @@ public class BookingController {
     public CancellationResult cancelBooking(User user, Booking booking) {
         if (user == null || booking == null) return CancellationResult.FAILED;
         if (booking.hasHotelBooking()) return CancellationResult.HOTEL_REQUIRES_PHONE;
+
+        if (flightBookingController != null) {
+            for (g1t.teamF.model.Booking fb : booking.getFlightBookings()) {
+                flightBookingController.cancelBooking(fb.getBookingReference());
+            }
+        }
+        for (DayTripBooking db : booking.getDayTripBookings()) {
+            cancelDayTripBooking(db);
+        }
+
         return user.removeBooking(booking) ? CancellationResult.CANCELLED : CancellationResult.FAILED;
     }
 
@@ -137,7 +154,18 @@ public class BookingController {
         Trip trip = booking.getTrip();
         if (trip == null || !trip.removeComponent(component)) return CancellationResult.FAILED;
 
+        if (component instanceof Flight flight) {
+            g1t.teamF.model.Booking fb = booking.removeFlightBookingByOutbound(flight);
+            if (fb != null && flightBookingController != null) {
+                flightBookingController.cancelBooking(fb.getBookingReference());
+            }
+        }
         if (component instanceof DayTrip dt) {
+            for (DayTripBooking db : new ArrayList<>(booking.getDayTripBookings())) {
+                if (db.getTripID() == dt.getTripID()) {
+                    cancelDayTripBooking(db);
+                }
+            }
             booking.removeDayTripBookingByTripID(dt.getTripID());
         }
 
@@ -145,5 +173,20 @@ public class BookingController {
             user.removeBooking(booking);
         }
         return CancellationResult.CANCELLED;
+    }
+
+    // Team D er ekki með cancel method á controller, svo við köllum beint í DB-in
+    private void cancelDayTripBooking(DayTripBooking db) {
+        if (dayTripBookingDB == null || dayTripDB == null) return;
+        try {
+            dayTripBookingDB.delete(db.getBookingID());
+            DayTrip trip = dayTripDB.selectByID(db.getTripID());
+            if (trip != null) {
+                trip.setBookedSpaces(Math.max(0, trip.getBookedSpaces() - 1));
+                dayTripDB.update(trip);
+            }
+        } catch (SQLException e) {
+            System.err.println("[booking] day trip cancel failed: " + e.getMessage());
+        }
     }
 }

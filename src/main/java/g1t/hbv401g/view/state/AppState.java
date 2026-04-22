@@ -11,6 +11,7 @@ import g1t.hbv401g.model.HotelSelection;
 import g1t.hbv401g.model.Trip;
 import g1t.hbv401g.model.User;
 import g1t.teamD.model.DayTrip;
+import g1t.teamF.model.Flight;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -92,9 +93,9 @@ public final class AppState {
         return ok;
     }
 
-    public boolean addSelectionToCart(List<DayTrip> dayTrips, HotelSelection hotel) {
+    public boolean addSelectionToCart(List<Flight> flights, List<DayTrip> dayTrips, HotelSelection hotel) {
         if (!isLoggedIn()) return false;
-        boolean ok = cartController.addSelection(currentUser, dayTrips, hotel);
+        boolean ok = cartController.addSelection(currentUser, flights, dayTrips, hotel);
         if (ok) notifyListeners();
         return ok;
     }

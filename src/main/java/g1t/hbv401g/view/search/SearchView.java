@@ -13,6 +13,9 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 public final class SearchView {
 
@@ -107,8 +110,12 @@ public final class SearchView {
             return;
         }
 
+        List<Flight> flights = new ArrayList<>();
+        if (results.selectedOut() != null) flights.add(results.selectedOut());
+        if (results.selectedReturn() != null) flights.add(results.selectedReturn());
+
         AppState.get().addSelectionToCart(
-                results.selectedDayTrips(), results.selectedHotel());
+                flights, results.selectedDayTrips(), results.selectedHotel());
 
         results.clearSelection();
         ViewRouter.get().openCart();

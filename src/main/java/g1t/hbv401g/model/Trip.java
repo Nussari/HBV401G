@@ -13,6 +13,7 @@ public class Trip {
     private String defaultName;
     private String customName;
     private final List<DayTrip> dayTrips = new ArrayList<>();
+    private final List<Flight> flights = new ArrayList<>();
     private HotelSelection hotel;
 
     public Trip(String defaultName) {
@@ -37,10 +38,14 @@ public class Trip {
     public HotelSelection getHotel() { return hotel; }
 
 
-    public List<Flight> getFlights() { return Collections.emptyList(); }
+    public List<Flight> getFlights() { return Collections.unmodifiableList(flights); }
 
-    public boolean addFlight(Flight flight) { return false; }
-    public boolean removeFlight(Flight flight) { return false; }
+    public boolean addFlight(Flight flight) {
+        if (flight == null || flights.contains(flight)) return false;
+        return flights.add(flight);
+    }
+
+    public boolean removeFlight(Flight flight) { return flights.remove(flight); }
 
     public boolean addDayTrip(DayTrip dayTrip) {
         if (dayTrip == null || dayTrips.contains(dayTrip)) return false;
@@ -64,16 +69,17 @@ public class Trip {
 
     public double getTotalCost() {
         double total = 0;
+        for (Flight f : flights) total += f.getPrice();
         for (DayTrip d : dayTrips) total += d.getPrice();
         if (hotel != null) total += hotel.getTotalCost();
         return total;
     }
 
     public boolean hasComponent() {
-        return !dayTrips.isEmpty() || hotel != null;
+        return !flights.isEmpty() || !dayTrips.isEmpty() || hotel != null;
     }
 
     public int getComponentCount() {
-        return dayTrips.size() + (hotel != null ? 1 : 0);
+        return flights.size() + dayTrips.size() + (hotel != null ? 1 : 0);
     }
 }

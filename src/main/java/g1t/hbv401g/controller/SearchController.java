@@ -1,6 +1,7 @@
 package g1t.hbv401g.controller;
 
 import g1t.hbv401g.db.Database;
+import g1t.hbv401g.demo.DemoDataLoader;
 import g1t.hbv401g.model.HotelSelection;
 import g1t.teamD.controller.DayTripController;
 import g1t.teamD.db.DayTripDB;
@@ -27,7 +28,6 @@ import java.util.Map;
 
 public class SearchController {
 
-    // private FlightSearchController flightSearchController; - setja inn þegar lið F skilar
     private final DayTripController dayTripController;
     private final FlightSearchController flightSearchController;
 
@@ -45,7 +45,7 @@ public class SearchController {
             System.err.println("[search] team D DayTripDB init failed: " + e.getMessage());
         }
         try {
-            fctrl = new FlightSearchController(new FlightDAO());
+            fctrl = new FlightSearchController(DemoDataLoader.flightDAO());
         } catch (Exception e) {
             System.err.println("[search] team D DayTripDB init failed: " + e.getMessage());
         }
@@ -66,60 +66,22 @@ public class SearchController {
                                              double priceMin,
                                              double priceMax,
                                              int travellerAmount) {
-        /*
-        List<Airport> originAirports = findAirportsByPlace(originPlace);
-        List<Airport> destinationAirports = findAirportsByPlace(destinationPlace);
-
-        List<Flight> results = new ArrayList<>();
-
-        // flug út
-        if (startDate != null) {
-            for (Airport dep : originAirports) {
-                for (Airport arr : destinationAirports) {
-                    results.addAll(flightSearchController.searchFlights(
-                            dep, arr, startDate, travellerAmount));
-                }
-            }
-        }
-
-        // flug heim
-        if (endDate != null) {
-            for (Airport dep : destinationAirports) {
-                for (Airport arr : originAirports) {
-                    results.addAll(flightSearchController.searchFlights(
-                            dep, arr, endDate, travellerAmount));
-                }
-            }
-        }
-
-        results.removeIf(f -> f.getPrice() < priceMin || f.getPrice() > priceMax); // price filter
-
-        return results;
-        */
         Airport orgAirport = flightSearchController.findAirportByPlace(originPlace);
         Airport destAirport = flightSearchController.findAirportByPlace(destinationPlace);
-        List<Flight> flightsToFrom = flightSearchController.searchFlights(orgAirport, destAirport, endDate, travellerAmount);
-        ArrayList<Flight> returnFlights = new ArrayList<>();
-        for (Flight flight : flightsToFrom) {
-            if (flight.getPrice() <= priceMax || flight.getPrice() >= priceMin){
-                returnFlights.add(flight);
-            }
-        }
-        return returnFlights;
-    }
+        if (orgAirport == null || destAirport == null) return new ArrayList<>();
 
-    // helper fall sem mappar place og airport svo hægt sé að leita eftir borgum
-    /*
-    public List<Airport> findAirportsByPlace(String place) {
-        List<Airport> matched = new ArrayList<>();
-        for (Airport a : flightSearchController.findAllAirports()) {
-            if (a.getPlace().equalsIgnoreCase(place)) {
-                matched.add(a);
-            }
+        List<Flight> results = new ArrayList<>();
+        // flug út
+        if (startDate != null) {
+            results.addAll(flightSearchController.searchFlights(orgAirport, destAirport, startDate, travellerAmount));
         }
-        return matched;
+        // flug heim
+        if (endDate != null) {
+            results.addAll(flightSearchController.searchFlights(destAirport, orgAirport, endDate, travellerAmount));
+        }
+        results.removeIf(f -> f.getPrice() < priceMin || f.getPrice() > priceMax);
+        return results;
     }
-    */
 
     public List<DayTrip> searchDayTrips(String place, int spacesNeeded,
                                         LocalDate startDate, LocalDate endDate,

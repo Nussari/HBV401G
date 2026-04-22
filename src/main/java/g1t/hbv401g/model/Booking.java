@@ -1,6 +1,7 @@
 package g1t.hbv401g.model;
 
 import g1t.teamD.model.DayTripBooking;
+import g1t.teamF.model.Flight;
 import g1t.teamF.model.FlightBooking;
 
 import java.util.ArrayList;
@@ -24,6 +25,15 @@ public class Booking {
 
     public List<g1t.teamF.model.Booking> getFlightBookings() { return Collections.unmodifiableList(flightBookings); }
     public void addFlightBooking(g1t.teamF.model.Booking booking) { if (booking != null) flightBookings.add(booking); }
+
+    public g1t.teamF.model.Booking removeFlightBookingByOutbound(Flight flight) {
+        for (int i = 0; i < flightBookings.size(); i++) {
+            if (flightBookings.get(i).getOutboundFlight() == flight) {
+                return flightBookings.remove(i);
+            }
+        }
+        return null;
+    }
 
     public List<DayTripBooking> getDayTripBookings() { return Collections.unmodifiableList(dayTripBookings); }
     public void addDayTripBooking(DayTripBooking booking) { if (booking != null) dayTripBookings.add(booking); }
