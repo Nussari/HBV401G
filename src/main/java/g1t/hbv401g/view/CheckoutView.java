@@ -3,7 +3,7 @@ package g1t.hbv401g.view;
 import g1t.hbv401g.model.Booking;
 import g1t.hbv401g.model.Cart;
 import g1t.teamD.model.DayTrip;
-import g1t.hbv401g.model.Flight;
+import g1t.teamF.model.Flight;
 import g1t.hbv401g.model.Trip;
 import g1t.hbv401g.view.components.ComponentRow;
 import g1t.hbv401g.view.components.TripTitleEditor;

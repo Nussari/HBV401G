@@ -1,7 +1,7 @@
 package g1t.hbv401g.view.util;
 
 import g1t.teamD.model.DayTrip;
-import g1t.hbv401g.model.Flight;
+import g1t.teamF.model.Flight;
 
 // formatting helperar
 public final class Formats {
@@ -17,15 +17,15 @@ public final class Formats {
     }
 
     public static String flightShort(Flight f) {
-        return f.getFlightID() + "  \u00B7  "
-                + f.getDepartureA().getCode() + "\u2192" + f.getArrivalA().getCode()
-                + "  \u00B7  " + f.getDepartureTime().toLocalDate();
+        return f.getFlightNumber() + "  \u00B7  "
+                + f.getDepartureAirport().getCode() + "\u2192" + f.getArrivalAirport().getCode()
+                + "  \u00B7  " + f.getDepartureTime();
     }
 
     public static String flightLong(Flight f) {
-        return f.getName() + " " + f.getFlightID() + "  \u00B7  "
-                + f.getDepartureA().getCode() + "\u2192" + f.getArrivalA().getCode()
-                + "  \u00B7  " + f.getDepartureTime().toLocalDate();
+        return f.getFlightNumber() + " " + f.getFlightID() + "  \u00B7  "
+                + f.getDepartureAirport().getCode() + "\u2192" + f.getArrivalAirport().getCode()
+                + "  \u00B7  " + f.getDepartureTime();
     }
 
     public static String dayTripShort(DayTrip t) {

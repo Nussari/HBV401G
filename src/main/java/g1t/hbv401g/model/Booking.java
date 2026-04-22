@@ -9,7 +9,7 @@ import java.util.List;
 public class Booking {
 
     private final Trip trip;
-    private final List<FlightBooking> flightBookings = new ArrayList<>();
+    private final List<g1t.teamF.model.Booking> flightBookings = new ArrayList<>();
     private final List<DayTripBooking> dayTripBookings = new ArrayList<>();
 
     public Booking(Trip trip) {
@@ -20,8 +20,8 @@ public class Booking {
     public String getName() { return trip == null ? "" : trip.getName(); }
     public double getTotal() { return trip == null ? 0 : trip.getTotalCost(); }
 
-    public List<FlightBooking> getFlightBookings() { return Collections.unmodifiableList(flightBookings); }
-    public void addFlightBooking(FlightBooking booking) { if (booking != null) flightBookings.add(booking); }
+    public List<g1t.teamF.model.Booking> getFlightBookings() { return Collections.unmodifiableList(flightBookings); }
+    public void addFlightBooking(g1t.teamF.model.Booking booking) { if (booking != null) flightBookings.add(booking); }
 
     public List<DayTripBooking> getDayTripBookings() { return Collections.unmodifiableList(dayTripBookings); }
     public void addDayTripBooking(DayTripBooking booking) { if (booking != null) dayTripBookings.add(booking); }

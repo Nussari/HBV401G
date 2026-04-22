@@ -1,6 +1,7 @@
 package g1t.hbv401g.model;
 
 import g1t.teamD.model.DayTrip;
+import g1t.teamF.model.Flight;
 
 import java.util.ArrayList;
 import java.util.Collections;

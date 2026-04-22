@@ -14,23 +14,25 @@ import g1t.teamD.model.DayTripBookingResult;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import controller.*;
-import model.*;
-import storage.*;
+import g1t.teamF.controller.*;
+import g1t.teamF.model.*;
+import g1t.teamF.db.*;
 
 
 public class BookingController {
 
     // private FlightBookingController flightBookingController; - setja inn þegar lið F skilar
     private final DayTripBookingController dayTripBookingController;
-    private final
+    private final FlightBookingController flightBookingController;
 
-    public BookingController(DayTripBookingController dayTripBookingController) {
+    public BookingController(DayTripBookingController dayTripBookingController, FlightBookingController flightBookingController) {
         this.dayTripBookingController = dayTripBookingController;
+        this.flightBookingController = flightBookingController;
     }
 
     public BookingController() {
         DayTripBookingController ctrl = null;
+        FlightBookingController fctrl = null;
         try {
             DayTripDB tripDB = new DayTripDB(Database.teamD());
             DayTripBookingDB bookingDB = new DayTripBookingDB(Database.teamD());
@@ -38,7 +40,14 @@ public class BookingController {
         } catch (SQLException e) {
             System.err.println("[booking] team D init failed: " + e.getMessage());
         }
+        try {
+            BookingDAO flightBookingDB = new BookingDAO();
+            fctrl = new FlightBookingController(flightBookingDB);
+        } catch (Exception e) {
+            System.err.println("[booking] team D init failed: " + e.getMessage());
+        }
         this.dayTripBookingController = ctrl;
+        this.flightBookingController = fctrl;
     }
 
     public List<Booking> checkout(User user) {
@@ -58,7 +67,17 @@ public class BookingController {
             //         booking.addFlightBooking(fb);
             //     }
             // }
+            if (flightBookingController != null) {
+                for (Flight flight : trip.getFlights()){
+                    g1t.teamF.model.Booking fBooking = 
+                    flightBookingController.createBooking(flight, flight, 1);
+                    fBooking.confirm();
+                    if (fBooking.getStatus() == BookingStatus.CONFIRMED){
+                        booking.addFlightBooking(fBooking);
+                    }
 
+                }
+            }
             if (dayTripBookingController != null) {
                 for (DayTrip dayTrip : trip.getDayTrips()) {
                     DayTripBookingResult result = dayTripBookingController.book(

@@ -32,8 +32,12 @@ public class SearchController {
         FlightSearchController fctrl = null;
         try {
             ctrl = new DayTripController(new DayTripDB(Database.teamD()));
-            fctrl = new FlightSearchController(new FlightDAO());
         } catch (SQLException e) {
+            System.err.println("[search] team D DayTripDB init failed: " + e.getMessage());
+        }
+        try {
+            fctrl = new FlightSearchController(new FlightDAO());
+        } catch (Exception e) {
             System.err.println("[search] team D DayTripDB init failed: " + e.getMessage());
         }
         this.dayTripController = ctrl;
@@ -118,9 +122,16 @@ public class SearchController {
 
         return results;
         */
-       
-       flightSearchController.searchFlights(originPlace, destinationPlace, endDate, travellerAmount);
-        return new ArrayList<>();
+        Airport orgAirport = flightSearchController.findAirportByPlace(originPlace);
+        Airport destAirport = flightSearchController.findAirportByPlace(destinationPlace);
+        List<Flight> flightsToFrom = flightSearchController.searchFlights(orgAirport, destAirport, endDate, travellerAmount);
+        ArrayList<Flight> returnFlights = new ArrayList<>();
+        for (Flight flight : flightsToFrom) {
+            if (flight.getPrice() <= priceMax || flight.getPrice() >= priceMin){
+                returnFlights.add(flight);
+            }
+        }
+        return returnFlights;
     }
 
     // helper fall sem mappar place og airport svo hægt sé að leita eftir borgum

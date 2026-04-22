@@ -2,7 +2,7 @@ package g1t.hbv401g.view.search;
 
 import g1t.hbv401g.controller.SearchController;
 import g1t.teamD.model.DayTrip;
-import g1t.hbv401g.model.Flight;
+import g1t.teamF.model.Flight;
 import g1t.hbv401g.view.ViewRouter;
 import g1t.hbv401g.view.state.AppState;
 import javafx.geometry.Insets;
@@ -87,6 +87,10 @@ public final class SearchView {
         for (DayTrip dt : results.selectedDayTrips()) {
             count++;
             total += dt.getPrice();
+        }
+        for (Flight flight : results.selectedFlights()) {
+            count++;
+            total += flight.getPrice();
         }
         summary.refresh(count, total);
     }

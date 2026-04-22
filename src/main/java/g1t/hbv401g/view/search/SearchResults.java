@@ -2,7 +2,7 @@ package g1t.hbv401g.view.search;
 
 import g1t.hbv401g.controller.SearchController;
 import g1t.teamD.model.DayTrip;
-import g1t.hbv401g.model.Flight;
+import g1t.teamF.model.Flight;
 import g1t.hbv401g.view.util.Animations;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -29,6 +29,7 @@ public final class SearchResults {
     private Flight selectedOut;
     private Flight selectedReturn;
     private final Set<DayTrip> selectedDayTrips = new LinkedHashSet<>();
+    private final Set<Flight> selectedFlights = new LinkedHashSet<>();
 
     public SearchResults(SearchController controller, Runnable onSelectionChange) {
         this.controller = controller;
@@ -42,15 +43,17 @@ public final class SearchResults {
     public Flight selectedOut() { return selectedOut; }
     public Flight selectedReturn() { return selectedReturn; }
     public List<DayTrip> selectedDayTrips() { return new ArrayList<>(selectedDayTrips); }
+    public List<Flight> selectedFlights() { return new ArrayList<>(selectedFlights); }
 
     public boolean hasAnySelection() {
-        return selectedOut != null || selectedReturn != null || !selectedDayTrips.isEmpty();
+        return selectedOut != null || selectedReturn != null || !selectedDayTrips.isEmpty() || !selectedFlights.isEmpty();
     }
 
     public void clearSelection() {
         selectedOut = null;
         selectedReturn = null;
         selectedDayTrips.clear();
+        selectedFlights.clear();
         onSelectionChange.run();
     }
 
@@ -95,7 +98,7 @@ public final class SearchResults {
                     form.from(), form.to(), form.depart(), form.returnOn(),
                     filters.priceMin(), filters.priceMax(), form.travellers());
             for (Flight f : all) {
-                if (f.getDepartureA().getPlace().equalsIgnoreCase(form.from())) out.add(f);
+                if (f.getDepartureAirport().getPlace().equalsIgnoreCase(form.from())) out.add(f);
                 else in.add(f);
             }
         } catch (IllegalArgumentException ignored) {}

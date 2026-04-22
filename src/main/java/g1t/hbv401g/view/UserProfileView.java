@@ -2,7 +2,7 @@ package g1t.hbv401g.view;
 
 import g1t.hbv401g.model.Booking;
 import g1t.teamD.model.DayTrip;
-import g1t.hbv401g.model.Flight;
+import g1t.teamF.model.Flight;
 import g1t.hbv401g.model.Trip;
 import g1t.hbv401g.model.User;
 import g1t.hbv401g.view.components.InfoRow;
@@ -256,9 +256,9 @@ public class UserProfileView {
         for (Flight f : t.getFlights()) {
             if (sb.length() > 0) sb.append("  \u00B7  ");
             sb.append("Flight ")
-              .append(f.getDepartureA().getCode())
+              .append(f.getDepartureAirport().getCode())
               .append("\u2192")
-              .append(f.getArrivalA().getCode());
+              .append(f.getArrivalAirport().getCode());
             if (flightIdx < b.getFlightBookings().size()) {
                 sb.append("  ref ").append(b.getFlightBookings().get(flightIdx).getBookingReference());
             }

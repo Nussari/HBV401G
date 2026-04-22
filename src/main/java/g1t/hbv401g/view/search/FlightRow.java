@@ -1,6 +1,7 @@
 package g1t.hbv401g.view.search;
 
-import g1t.hbv401g.model.Flight;
+import g1t.teamF.model.Flight;
+import java.time.Duration;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -25,9 +26,9 @@ public final class FlightRow {
         row.getChildren().setAll(
                 checkBadge(outbound),
                 airlineBlock(f),
-                time(f.getDepartureTime().toLocalTime().toString()),
+                time(f.getDepartureTime().toString()),
                 arrow(),
-                time(f.getArrivalTime().toLocalTime().toString()),
+                time(f.getArrivalTime().toString()),
                 routeBlock(f),
                 grow(),
                 price(f));
@@ -45,7 +46,7 @@ public final class FlightRow {
         });
 
         Tooltip.install(row, new Tooltip(
-                f.getDepartureA().getName() + " \u2192 " + f.getArrivalA().getName()));
+                f.getDepartureAirport().getPlace() + " \u2192 " + f.getArrivalAirport().getPlace()));
         return row;
     }
 
@@ -56,9 +57,9 @@ public final class FlightRow {
     }
 
     private static VBox airlineBlock(Flight f) {
-        Label name = new Label(f.getName());
+        Label name = new Label(f.getFlightNumber());
         name.getStyleClass().addAll("fs-13", "bold", "text-base");
-        Label id = new Label(f.getFlightID());
+        Label id = new Label(""+f.getFlightID());
         id.getStyleClass().addAll("mono", "fs-11");
         return new VBox(2, name, id);
     }
@@ -76,9 +77,9 @@ public final class FlightRow {
     }
 
     private static VBox routeBlock(Flight f) {
-        Label route = new Label(f.getDepartureA().getCode() + "  \u00B7  " + f.getArrivalA().getCode());
+        Label route = new Label(f.getDepartureAirport().getCode() + "  \u00B7  " + f.getArrivalAirport().getCode());
         route.getStyleClass().addAll("mono", "fs-11");
-        Label dur = new Label(f.getDuration());
+        Label dur = new Label(f.getDuration().toString());
         dur.getStyleClass().addAll("mono", "fs-11");
         return new VBox(2, route, dur);
     }
