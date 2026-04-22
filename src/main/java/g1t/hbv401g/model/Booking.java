@@ -27,6 +27,9 @@ public class Booking {
 
     public List<DayTripBooking> getDayTripBookings() { return Collections.unmodifiableList(dayTripBookings); }
     public void addDayTripBooking(DayTripBooking booking) { if (booking != null) dayTripBookings.add(booking); }
+    public void removeDayTripBookingByTripID(int tripID) {
+        dayTripBookings.removeIf(b -> b.getTripID() == tripID);
+    }
 
     public is.hi.H1.model.Booking getHotelBooking() { return hotelBooking; }
     public void setHotelBooking(is.hi.H1.model.Booking booking) { this.hotelBooking = booking; }

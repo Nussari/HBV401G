@@ -135,6 +135,14 @@ public final class AppState {
         return result;
     }
 
+    public BookingController.CancellationResult cancelBookingComponent(Booking booking, Object component) {
+        if (!isLoggedIn()) return BookingController.CancellationResult.FAILED;
+        BookingController.CancellationResult result =
+                bookingController.cancelBookingComponent(currentUser, booking, component);
+        if (result == BookingController.CancellationResult.CANCELLED) notifyListeners();
+        return result;
+    }
+
     public void subscribe(Runnable r) { listeners.add(r); }
     public void notifyListeners() { for (Runnable r : new ArrayList<>(listeners)) r.run(); }
 }

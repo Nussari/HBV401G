@@ -106,4 +106,21 @@ public class BookingController {
         if (booking.hasHotelBooking()) return CancellationResult.HOTEL_REQUIRES_PHONE;
         return user.removeBooking(booking) ? CancellationResult.CANCELLED : CancellationResult.FAILED;
     }
+
+    public CancellationResult cancelBookingComponent(User user, Booking booking, Object component) {
+        if (user == null || booking == null || component == null) return CancellationResult.FAILED;
+        if (component instanceof HotelSelection) return CancellationResult.HOTEL_REQUIRES_PHONE;
+
+        Trip trip = booking.getTrip();
+        if (trip == null || !trip.removeComponent(component)) return CancellationResult.FAILED;
+
+        if (component instanceof DayTrip dt) {
+            booking.removeDayTripBookingByTripID(dt.getTripID());
+        }
+
+        if (!trip.hasComponent() && !booking.hasHotelBooking()) {
+            user.removeBooking(booking);
+        }
+        return CancellationResult.CANCELLED;
+    }
 }

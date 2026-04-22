@@ -1,7 +1,6 @@
 package g1t.hbv401g.view.search;
 
 import g1t.hbv401g.controller.SearchController;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -11,7 +10,6 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
 import java.time.LocalDate;
@@ -53,7 +51,7 @@ public final class SearchForm {
         GridPane form = new GridPane();
         form.getStyleClass().add("search-form");
         form.getColumnConstraints().addAll(
-                col(15), col(15), col(17), col(17), col(15), colGrow(21));
+                col(24), col(24), col(18), col(18), col(16));
 
         wirePlaces(controller.getPlaces());
         wireDates();
@@ -63,7 +61,6 @@ public final class SearchForm {
         form.add(field("DEPART", departDate, false),  2, 0);
         form.add(field("RETURN", returnDate, false),  3, 0);
         form.add(field("TRAVELLERS", stepper(), true),4, 0);
-        form.add(searchButton(),                      5, 0);
 
         return form;
     }
@@ -118,18 +115,6 @@ public final class SearchForm {
         onChange.run();
     }
 
-    private Button searchButton() {
-        Button b = new Button("Search  \u2192");
-        b.getStyleClass().add("btn-search");
-        b.setMaxWidth(Double.MAX_VALUE);
-        b.setMaxHeight(Double.MAX_VALUE);
-        b.setMinWidth(150);
-        b.setOnAction(e -> onChange.run());
-        GridPane.setMargin(b, new Insets(6));
-        GridPane.setFillHeight(b, true);
-        return b;
-    }
-
     private static VBox field(String labelText, Node control, boolean last) {
         Label lbl = new Label(labelText);
         lbl.getStyleClass().add("field-label");
@@ -142,12 +127,6 @@ public final class SearchForm {
     private static ColumnConstraints col(double percent) {
         ColumnConstraints c = new ColumnConstraints();
         c.setPercentWidth(percent);
-        return c;
-    }
-
-    private static ColumnConstraints colGrow(double percent) {
-        ColumnConstraints c = col(percent);
-        c.setHgrow(Priority.ALWAYS);
         return c;
     }
 }

@@ -15,16 +15,21 @@ public final class ComponentRow {
     private ComponentRow() {}
 
     public static HBox readOnly(String kindCode, String label, double price) {
-        return build(kindCode, label, price, null, null, 14, 42);
+        return build(kindCode, label, price, null, 14, 42);
     }
 
     public static HBox removable(String kindCode, String label, double price,
                                  Trip trip, Object component) {
-        return build(kindCode, label, price, trip, component, 12, 40);
+        return build(kindCode, label, price,
+                () -> AppState.get().removeComponentFromTrip(trip, component), 12, 40);
+    }
+
+    public static HBox cancellable(String kindCode, String label, double price, Runnable onCancel) {
+        return build(kindCode, label, price, onCancel, 12, 40);
     }
 
     private static HBox build(String kindCode, String label, double price,
-                              Trip trip, Object component,
+                              Runnable onAction,
                               int spacing, int kindSize) {
         HBox row = new HBox(spacing);
         row.setAlignment(Pos.CENTER_LEFT);
@@ -46,10 +51,10 @@ public final class ComponentRow {
 
         row.getChildren().setAll(kind, lbl, priceLbl);
 
-        if (trip != null && component != null) {
+        if (onAction != null) {
             Button drop = new Button("\u2715");
             drop.getStyleClass().addAll("tx-cart-close", "fs-11");
-            drop.setOnAction(e -> AppState.get().removeComponentFromTrip(trip, component));
+            drop.setOnAction(e -> onAction.run());
             row.getChildren().add(drop);
         }
         return row;
